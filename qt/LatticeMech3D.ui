@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1139</width>
+    <height>833</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_3">
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QTreeWidget" name="treeWidget">
+          <property name="maximumSize">
+           <size>
+            <width>200</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <column>
+           <property name="text">
+            <string>Lattice</string>
+           </property>
+          </column>
+          <item>
+           <property name="text">
+            <string>Material</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>Aluminum:7000,0.3</string>
+            </property>
+           </item>
+          </item>
+          <item>
+           <property name="text">
+            <string>Nodes</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>N1:0.0,0.5</string>
+            </property>
+           </item>
+          </item>
+          <item>
+           <property name="text">
+            <string>Beams</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>B1:1,1,0,1,0.5</string>
+            </property>
+           </item>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="QOpenGLWidget" name="openGLWidget">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>600</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QTableWidget" name="tableWidget">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>60</height>
+             </size>
+            </property>
+            <row>
+             <property name="text">
+              <string>N1</string>
+             </property>
+            </row>
+            <column>
+             <property name="text">
+              <string>X</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Y</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QTextBrowser" name="textBrowser">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>150</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1139</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menufile">
+    <property name="title">
+     <string>file</string>
+    </property>
+    <addaction name="actionOpen"/>
+    <addaction name="actionsave"/>
+    <addaction name="actionsave_picture"/>
+    <addaction name="actionsave_txt"/>
+    <addaction name="actionsave_json"/>
+    <addaction name="actionexit"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionadd_node"/>
+    <addaction name="actionadd_beam"/>
+    <addaction name="actionremove_element"/>
+   </widget>
+   <widget class="QMenu" name="menuCalculate">
+    <property name="title">
+     <string>Calculate</string>
+    </property>
+   </widget>
+   <addaction name="menufile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuCalculate"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open xml</string>
+   </property>
+  </action>
+  <action name="actionsave">
+   <property name="text">
+    <string>save xml</string>
+   </property>
+  </action>
+  <action name="actionsave_picture">
+   <property name="text">
+    <string>save picture</string>
+   </property>
+  </action>
+  <action name="actionsave_txt">
+   <property name="text">
+    <string>save txt</string>
+   </property>
+  </action>
+  <action name="actionsave_json">
+   <property name="text">
+    <string>save json</string>
+   </property>
+  </action>
+  <action name="actionexit">
+   <property name="text">
+    <string>exit</string>
+   </property>
+  </action>
+  <action name="actionadd_node">
+   <property name="text">
+    <string>add node</string>
+   </property>
+  </action>
+  <action name="actionadd_beam">
+   <property name="text">
+    <string>add beam</string>
+   </property>
+  </action>
+  <action name="actionremove_element">
+   <property name="text">
+    <string>remove element</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>tableWidget</sender>
+   <signal>cellChanged(int,int)</signal>
+   <receiver>tableWidget</receiver>
+   <slot>reset()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>640</x>
+     <y>690</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>640</x>
+     <y>689</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>treeWidget</sender>
+   <signal>itemClicked(QTreeWidgetItem*,int)</signal>
+   <receiver>treeWidget</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>69</x>
+     <y>90</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>72</x>
+     <y>89</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>statusbar</sender>
+   <signal>messageChanged(QString)</signal>
+   <receiver>statusbar</receiver>
+   <slot>clearMessage()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1067</x>
+     <y>822</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1067</x>
+     <y>822</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
