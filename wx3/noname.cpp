@@ -81,6 +81,11 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	this->SetSizer( bSizer1 );
 	this->Layout();
 	m_toolBar1 = this->CreateToolBar( wxTB_HORIZONTAL, wxID_ANY );
+	wxString m_choice1Choices[] = { wxT("visu 3d"), wxT("yield limits"), wxT("visu 2d"), wxEmptyString };
+	int m_choice1NChoices = sizeof( m_choice1Choices ) / sizeof( wxString );
+	m_choice1 = new wxChoice( m_toolBar1, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choice1NChoices, m_choice1Choices, 0 );
+	m_choice1->SetSelection( 0 );
+	m_toolBar1->AddControl( m_choice1 );
 	m_toolBar1->Realize();
 
 

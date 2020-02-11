@@ -21,6 +21,7 @@
 #include <wx/grid.h>
 #include <wx/sizer.h>
 #include <wx/richtext/richtextctrl.h>
+#include <wx/choice.h>
 #include <wx/toolbar.h>
 #include <wx/frame.h>
 
@@ -43,6 +44,7 @@ class MyFrame1 : public wxFrame
 		wxGrid* m_grid1;
 		wxRichTextCtrl* m_richText1;
 		wxToolBar* m_toolBar1;
+		wxChoice* m_choice1;
 
 	public:
 

@@ -24,6 +24,51 @@ class MyFrame1 ( wx.Frame ):
 		self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
 
 		self.m_menubar1 = wx.MenuBar( 0 )
+		self.m_menu1 = wx.Menu()
+		self.m_menuItem1 = wx.MenuItem( self.m_menu1, wx.ID_ANY, u"Open", wx.EmptyString, wx.ITEM_NORMAL )
+		self.m_menu1.Append( self.m_menuItem1 )
+
+		self.m_menuItem2 = wx.MenuItem( self.m_menu1, wx.ID_ANY, u"Save", wx.EmptyString, wx.ITEM_NORMAL )
+		self.m_menu1.Append( self.m_menuItem2 )
+
+		self.m_menuItem3 = wx.MenuItem( self.m_menu1, wx.ID_ANY, u"Save as", wx.EmptyString, wx.ITEM_NORMAL )
+		self.m_menu1.Append( self.m_menuItem3 )
+
+		self.m_menuItem4 = wx.MenuItem( self.m_menu1, wx.ID_ANY, u"Close", wx.EmptyString, wx.ITEM_NORMAL )
+		self.m_menu1.Append( self.m_menuItem4 )
+
+		self.m_menubar1.Append( self.m_menu1, u"File" )
+
+		self.m_menu3 = wx.Menu()
+		self.m_menuItem5 = wx.MenuItem( self.m_menu3, wx.ID_ANY, u"Delete item", wx.EmptyString, wx.ITEM_NORMAL )
+		self.m_menu3.Append( self.m_menuItem5 )
+
+		self.m_menubar1.Append( self.m_menu3, u"Edit" )
+
+		self.m_menu5 = wx.Menu()
+		self.m_menuItem6 = wx.MenuItem( self.m_menu5, wx.ID_ANY, u"Visu 2D", wx.EmptyString, wx.ITEM_NORMAL )
+		self.m_menu5.Append( self.m_menuItem6 )
+
+		self.m_menuItem7 = wx.MenuItem( self.m_menu5, wx.ID_ANY, u"Visu 3D", wx.EmptyString, wx.ITEM_NORMAL )
+		self.m_menu5.Append( self.m_menuItem7 )
+
+		self.m_menuItem8 = wx.MenuItem( self.m_menu5, wx.ID_ANY, u"Yield limits", wx.EmptyString, wx.ITEM_NORMAL )
+		self.m_menu5.Append( self.m_menuItem8 )
+
+		self.m_menubar1.Append( self.m_menu5, u"View" )
+
+		self.m_menu6 = wx.Menu()
+		self.m_menuItem9 = wx.MenuItem( self.m_menu6, wx.ID_ANY, u"Add Point", wx.EmptyString, wx.ITEM_NORMAL )
+		self.m_menu6.Append( self.m_menuItem9 )
+
+		self.m_menuItem10 = wx.MenuItem( self.m_menu6, wx.ID_ANY, u"Add Beam", wx.EmptyString, wx.ITEM_NORMAL )
+		self.m_menu6.Append( self.m_menuItem10 )
+
+		self.m_menubar1.Append( self.m_menu6, u"Tools" )
+
+		self.m_menu7 = wx.Menu()
+		self.m_menubar1.Append( self.m_menu7, u"Help" )
+
 		self.SetMenuBar( self.m_menubar1 )
 
 		self.m_statusBar1 = self.CreateStatusBar( 1, wx.STB_SIZEGRIP, wx.ID_ANY )
@@ -88,6 +133,10 @@ class MyFrame1 ( wx.Frame ):
 		self.SetSizer( bSizer1 )
 		self.Layout()
 		self.m_toolBar1 = self.CreateToolBar( wx.TB_HORIZONTAL, wx.ID_ANY )
+		m_choice1Choices = [ u"visu 3d", u"yield limits", u"visu 2d", wx.EmptyString ]
+		self.m_choice1 = wx.Choice( self.m_toolBar1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choice1Choices, 0 )
+		self.m_choice1.SetSelection( 0 )
+		self.m_toolBar1.AddControl( self.m_choice1 )
 		self.m_toolBar1.Realize()
 
 
@@ -95,5 +144,3 @@ class MyFrame1 ( wx.Frame ):
 
 	def __del__( self ):
 		pass
-
-
