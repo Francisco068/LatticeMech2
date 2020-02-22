@@ -18,9 +18,9 @@
 "Ka": [21.0,21.0],
 "Kb": [0.21000000000000005,0.21000000000000005],
 "comment7": "List of element lengths and volumes",
-"Lb": [10.0,10.0],
-"tb": [1.0,1.0],
+"Lb": [1.0,1.0],
+"tb": [0.1,0.1],
 "comment8": "Norme of the periodicity vectors",
-"L1":10.0000,
-"L2":10.0000
+"L1":1.0000,
+"L2":1.0000
 }

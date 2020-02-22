@@ -27,7 +27,7 @@ void main()
 
 class OpenGLCanvas(glcanvas.GLCanvas):
     def __init__(self, parent):
-        glcanvas.GLCanvas.__init__(self, parent, -1, size=(640, 480))
+        self.Glcanvas=glcanvas.GLCanvas.__init__(self, parent, -1, size=(640, 480))
         self.init = False
         self.context = glcanvas.GLContext(self) 
         self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
@@ -43,6 +43,7 @@ class OpenGLCanvas(glcanvas.GLCanvas):
             self.InitGL()
             self.init = True
         self.OnDraw()
+
 
     def InitGL(self):
 
