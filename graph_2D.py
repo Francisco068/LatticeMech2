@@ -104,11 +104,11 @@ class Graph_window(wx.Window):
      """
     def __init__(self,parent,Gd_pere):
         wx.Window.__init__(self, parent,size=parent.ClientSize)
+        size=parent.ClientSize
         self.parent=parent
         self.Gd_pere=Gd_pere
-        self.view_1=view(1,1,0,0,100,False,0,100,100)
-
-        self.EL=self.Gd_pere.EL
+        self.EL=Gd_pere.EL
+        self.view_1=view(1,1,0,0,100,False,0,size.width,size.height)
 
         self.last_pos = self.ScreenToClient(wx.GetMousePosition())
         self.buffer = wx.BufferedDC()
@@ -124,18 +124,39 @@ class Graph_window(wx.Window):
         self.Bind(wx.EVT_RIGHT_UP, self.on_right_up)
         self.Bind(wx.EVT_RIGHT_DOWN,self.on_right_down)
         self.Bind(wx.EVT_MOUSEWHEEL,self.on_wheel)
+        self.Bind(wx.EVT_CHAR,self.on_char)
+        self.Bind(wx.EVT_SHOW,self.On_show)
+        self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
+
+
+    def On_show(self,event):
+
+        event.Skip()
         
-    
+    def reassign_EL(self,EL):
+        self.EL=EL
+
+    def on_char(self,event):
+        """zoom in / out while char +/- is typed"""
+        key=event.GetKeyCode()
+        ctrl=event.ControlDown()
+        if (key==388 or key==61) and ctrl==1:
+            self.key_zoom(1)
+        
+        if (key==390 or key==54) and ctrl==1:
+            self.key_zoom(2)
+        
     def save_bmp(self):
         myImage=self.buffer
         myImage.SaveFile("image.bmp",wx.BITMAP_TYPE_BMP)
 
-    def reassign_EL(self,EL):
-        """Replace the instance of elements passed in argument"""
-        self.EL=EL
- 
+    def Resize(self):
+        self.Size=self.Parent.ClientSize
+        self._buffer = wx.Bitmap(self.Size)
+
     def on_size(self, event):
         """Modify attributes on event SIZE"""
+        
         width, height = self.parent.GetClientSize()
         self._buffer = wx.Bitmap(width, height)
         self.view_1.width=width
@@ -145,8 +166,13 @@ class Graph_window(wx.Window):
 
     def Repaint(self):
         """Redraw all graphic components"""
-        self.Size=self.parent.ClientSize
-        self._buffer = wx.Bitmap(self.Size)
+        width, height = self.parent.GetClientSize()
+        if width!=self.Size.width|height!=self.Size.height:
+            self.SetSize(0,0,width,height)
+            self._buffer = wx.Bitmap(width, height)
+            self.view_1.width=width
+            self.view_1.height=height
+
         dc = wx.AutoBufferedPaintDC(self)
         dc.Clear()
         Mouse_position= self.ScreenToClient(wx.GetMousePosition())
@@ -167,16 +193,18 @@ class Graph_window(wx.Window):
         font = wx.Font(10, wx.SWISS, wx.NORMAL, wx.LIGHT) 
         dc.SetTextForeground((0,0,0))
         dc.SetFont(font) 
-        if self.Gd_pere.fs.File_saved:
+        if self.Gd_pere.File_saved:
             str1="(Saved)"
         else:
             str1="(**NOT Saved**)"
         str2="Mode :"+ self.EL.Mode+ " Zoom : %4.2f "+str1
         dc.DrawText(str2 % self.view_1.zoom,10,10) 
-        self.buffer=dc.GetAsBitmap()
+
+
 
     def on_paint(self, event):
         """Redraw all graphic components on event PAINT"""
+        self.Repaint()
         self.Repaint()
         event.Skip()
 
@@ -208,6 +236,7 @@ class Graph_window(wx.Window):
             for i in self.EL.beams:
                 N1=self.EL.index_node(i.node_1)
                 N2=self.EL.index_node(i.node_2)
+                prof=self.EL.index_profile(i.profile)
                 Y1=self.EL.periods[0]
                 Y2=self.EL.periods[1]
                 Y1W=np.array([Y1.x,Y1.y])*Y1.length
@@ -226,7 +255,7 @@ class Graph_window(wx.Window):
                 N=A/L
                 H=np.dot(B,N)
                 d=math.sqrt(np.linalg.norm(B)**2-H**2)
-                if d<i.width*self.view_1.zoom and H>10 and H<(L-10):
+                if d<prof.width*self.view_1.zoom and H>10 and H<(L-10):
                     i.focused=True
                     break
                 else:
@@ -279,101 +308,18 @@ class Graph_window(wx.Window):
         Pos_world=self.view_1.screen_to_world(Pos_screen.x,Pos_screen.y)
 
         if self.EL.Mode=="DELETE_ELEMENT":
-            for i in self.EL.nodes:
-                if i.focused==True and len(self.EL.nodes)>1:
-                    numero=i.number
-                    self.EL.nodes.remove(i)
-                    self.Gd_pere.File_saved=False
-                    Item1=self.Gd_pere.Search_item_tree_ctrl_perso("Nodes",numero)
-                    if Item1[0]==1:
-                        self.Gd_pere.tree_ctrl_1.Delete(Item1[1])
-                    else:
-                        print("Point not found in the tree")
-                    for j in self.EL.beams:
-                        if numero==j.node_1 or numero==j.node_2:
-                            self.EL.beams.remove(j)
-                            Item1=self.Gd_pere.Search_item_tree_ctrl_perso("Beams",numero)
-                            if Item1[0]==1:
-                                self.Gd_pere.tree_ctrl_1.Delete(Item1[1])
-                            else:
-                                print("Element not found in the tree")
-            for i in self.EL.beams:
-                if i.focused==True:
-                    numero=i.number
-                    self.EL.beams.remove(i)
-                    self.Gd_pere.File_saved=False
-                    Item1=self.Gd_pere.Search_item_tree_ctrl_perso("Beams",numero)
-                    if Item1[0]==1:
-                        self.Gd_pere.tree_ctrl_1.Delete(Item1[1])
-                    else:
-                        print("Element not found in the tree")
-                    break
+            self.Gd_pere.EL.Remove_focused_element()
 
         if self.EL.Mode=="ADD_POINT":
-            resultat=self.Gd_pere.Search_branch_tree_ctrl_perso("Nodes")
-            print(resultat)
-            if (resultat[0]==-1):
-                self.Gd_pere.Message_perso("Error: no branch of Node inputs",wx.ICON_ERROR)
-            str1=self.Gd_pere.tree_ctrl_1.GetItemText(resultat[2])
-            str2=str1.split(':')
-            str3=str2[0].split('.')
-            numero=int(str3[1])
-            numero=numero+1
-
-            str_tree="N.%i:(%5.2f,%5.2f)" % (numero,Pos_world[0],Pos_world[1])
-    
-            self.Gd_pere.tree_ctrl_1.AppendItem(resultat[1],str_tree)
-            self.EL.nodes.append(node(Pos_world[0],Pos_world[1],5,numero))
-            self.Gd_pere.File_saved=False
+            self.Gd_pere.EL.Add_node(Pos_world)
         
         if self.EL.Mode=="ADD_BEAM_P1":
-            for i in self.EL.nodes:
-                if i.focused==True:
-                    self.EL.P1_acquired=copy.deepcopy(i)                    
-                    self.EL.Mode="ADD_BEAM_P2"
-                    i.focused=False
-                    self.EL.P1_acquired_bool=True
-                    break
+            self.Gd_pere.EL.Add_beam(1)
         
         if self.EL.Mode=="ADD_BEAM_P2":
-            for i in self.EL.nodes:
-                if i.focused==True:
-                    self.EL.Mode="ADD_BEAM_P1"
-                    resultat=self.Gd_pere.Search_branch_tree_ctrl_perso("Beams")
-                    if (resultat[0]==-1):
-                        self.Gd_pere.Message_perso("Error: No branch of beam inputs",wx.ICON_ERROR)
-                    if (resultat[0]==1):
-                        str1=self.Gd_pere.tree_ctrl_1.GetItemText(resultat[2])
-                        str2=str1.split(':')
-                        str3=str2[0].split('.')
-                        str4=str2[1].split(',')
-                        numero=int(str3[1])
-                        numero=numero+1
-                    if (resultat[0]==-2):
-                        numero=1
-                        str4=[0,0,0,0,0,0.1]
+            self.Gd_pere.EL.Add_beam(2)
 
-                    str_tree="beam.%i:(%i,%i),(%i,%i),rect,%5.2f" % (numero,self.EL.P1_acquired.number\
-                        ,i.number,i.delta_1_focus,i.delta_2_focus,float(str4[5]))
-            
-                    self.Gd_pere.tree_ctrl_1.AppendItem(resultat[1],str_tree)
-                   
-                    self.EL.P1_acquired.focused=False
-                    self.EL.P1_acquired_bool=False
-                    
-                    resultat=self.Gd_pere.Search_branch_tree_ctrl_perso("Material")
-                    if (resultat[0]==-1):
-                        self.Gd_pere.Message_perso("Error: no branch of material inputs",wx.ICON_ERROR)
-                    str5=self.Gd_pere.tree_ctrl_1.GetItemText(resultat[2])
-                    str6=str5.split(':')
-                    str7=str6[1].split(',')
-                    self.EL.beams.append(beam(self.EL.P1_acquired.number,i.number,i.delta_1_focus,i.delta_2_focus,"rect",\
-                        0,float(str4[5]),0,0,0,0,float(str7[0]),numero))
-                    self.EL.beams[len(self.EL.beams)-1].evaluate_k(self.EL)
-                    self.Gd_pere.File_saved=False
-                    break            
-
-        self.Refresh()
+        self.Refresh(False)
         event.Skip()
 
     def on_right_down(self, event):

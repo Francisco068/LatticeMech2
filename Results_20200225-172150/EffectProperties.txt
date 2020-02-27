@@ -1,0 +1,7 @@
+The bulk modulus is K =      7.181
+The elastic modulus in the x direction is Ex =     17.756
+The elastic modulus in the y direction is Ey =     16.728
+The Poisson's yx value is v_yx =     -0.194
+The Poisson's xy value is v_xy =     -0.206
+The shear modulus is G =      4.378
+The relative density is rho =      0.482

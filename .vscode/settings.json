@@ -1,3 +1,5 @@
 {
-    "python.pythonPath": "C:\\Users\\Francisco\\Anaconda3\\python.exe"
+    "python.pythonPath": "C:\\Users\\Francisco\\Anaconda3\\python.exe",
+    "workbench.preferredDarkColorTheme": "Monokai Dimmed",
+    "editor.cursorBlinking": "phase"
 }
