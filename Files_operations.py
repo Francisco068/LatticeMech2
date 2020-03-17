@@ -1,6 +1,7 @@
 from LatticeMech2 import *
 import xml.etree.ElementTree as ET
 import wx
+import lattice_objects
 
 class Files_system():
     def __init__(self, parent,*args):
@@ -13,18 +14,24 @@ class Files_system():
         self.parent.EL.Delete_all_items()
 
         Item1=self.parent.GUI.m_treeCtrl1.AddRoot(root.text)
+
         for child1 in root:
             Item2=self.parent.GUI.m_treeCtrl1.AppendItem(Item1,child1.text)
             for child2 in child1:
                 self.parent.GUI.m_treeCtrl1.AppendItem(Item2,child2.text)
                 str0=child2.text
-                str0=str0.replace('(','').replace(')','')
                 str1=str0.split(':')
                 str10=str1[0].split('.')
                 str11=str1[1].split(',')
 
-                if str10[0]=="modulus(GPa)":
-                    Material_E=float(str11[0])
+                if str10[0]=="Profile":
+                    number=int(str10[1])
+                    E=float(str11[0])
+                    nu=float(str11[1])
+                    section=str11[2]
+                    width=float(str11[3])
+                    self.parent.EL.profiles.append(profile(number,E,nu,section,width))
+
                 if str10[0]=="Y":
                     x=float(str11[0])
                     y=float(str11[1])
@@ -32,28 +39,26 @@ class Files_system():
                     vect1=normalize_vector(vect)
                     L=np.linalg.norm(vect)
                     self.parent.EL.periods.append(periodicity(vect1[0],vect1[1],L,int(str10[1])))
+
                 if str10[0]=="N":
                     x=float(str11[0])
                     y=float(str11[1])
                     self.parent.EL.nodes.append(node(x,y,5,int(str10[1])))
+
                 if str10[0]=="beam":
                     node_1=int(str11[0])
                     node_2=int(str11[1])
                     delta_1=int(str11[2])
                     delta_2=int(str11[3])
-                    width=float(str11[5])
+                    profile_=int(str11[4])
                     number=int(str10[1])
-                    self.parent.EL.beams.append(beam(node_1,node_2,delta_1,delta_2,str11[4],0,width,0,0,0,0,Material_E,number))
-                    a=self.parent.EL.beams[len(self.parent.EL.beams)-1]
-                    a.evaluate_k(self.parent.EL)
+                    beam_=beam(node_1,node_2,delta_1,delta_2,profile_,0,0,0,0,0,number)
+                    beam_.evaluate_k(self.parent.EL)
+                    self.parent.EL.beams.append(beam_)
+
         self.parent.GUI.m_treeCtrl1.ExpandAll()
         self.parent.File_saved=True
         self.parent.Filename_defined=True
-
-
-
-
-
 
     def Save_xml(self,tree,file):
         tree_root=tree.GetRootItem()
@@ -87,6 +92,14 @@ class Files_system():
         self.File_saved=True
 
     def Generate_json(self,file):
+        """[summary]
+        
+        Arguments:
+            file {[type]} -- [description]
+        
+        Returns:
+            [type] -- [description]
+        """        
         myfile=open(file,"w+")
         myfile.write("{\n")
         # Write number of elements
@@ -163,6 +176,7 @@ class Files_system():
         return 0
 
     def Generate_txt(self,file):
+   
         myfile=open(file,"w+")
         # Write number of elements
         myfile.write("# Define the number of elements\n")

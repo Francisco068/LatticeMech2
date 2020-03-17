@@ -3,7 +3,8 @@ import numpy as np
 from math_ext import *
 import copy
 
-#"Profile.1:210,0.3,rect,0.1")
+#"Profiles:"
+#" Profile.1:210,0.3,rect,0.1"
 class profile(object):
     """ Class for object :profile of the beams"""
     def __init__(self,number,E,nu,section,width):
@@ -13,6 +14,9 @@ class profile(object):
         self.section=section
         self.width=width
 
+#"Basis:"
+#" Y.1:1,0"
+#" Y.number:x,y"
 class periodicity(object):
     """Class for object : periodicity vectors 
     
@@ -61,6 +65,9 @@ class periodicity(object):
 
         dc.DrawBitmap(bitmap,Pos_text_1[0]-bitmap.Width-2,Pos_text_1[1]+2,True)
 
+#"Nodes:"
+#" N.1:0,0"
+#" N.number:x,y"
 class node(object):
     """Class for object: node
     
@@ -132,7 +139,11 @@ class node(object):
         bitmap=view.mathtext_to_wxbitmap("$n_{"+s+"} $")
 
         dc.DrawBitmap(bitmap,pos_S[0]-bitmap.Width,pos_S[1]+self.radius+2,True)
-  
+
+# tree_Ctrl :
+#"Beams:"
+#" beam.1:1,1,1,0,1"
+#" beam.number:node_1,node_2,delta_1,delta_2,profile"
 class beam(object):
     """Class for object: beam 
     
@@ -260,6 +271,7 @@ class elements(object):
     nodes[]: array of nodes
     beams[]: array of beams
     periods[]: array of periodicity vectors
+    profiles[]: array of profiles : section type and material
     Mode: actual mode 
     P1_acquired: point 1 node for mode ADD BEAM P1
     P1_acquired_bool: True if a Point 1 node is yet acquired 

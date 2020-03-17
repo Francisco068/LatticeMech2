@@ -7,9 +7,13 @@ from Files_operations import *
 from Tree_Grid import *
 import json
 
+import time
+
+
 from DiscreteLatticeMech.DiscreteLatticeMechCore import Solver, Writer
 
 class GUI3D(wx.App):
+    
     def OnInit(self):
         self.GUI= MyFrame1(None)
         self.SetTopWindow(self.GUI)
@@ -69,6 +73,7 @@ class GUI3D(wx.App):
         return True
     
     def TreeCtrl_select(self,event):
+        
         item_1 = event.Item
         self.Tg.Selection_item(item_1)
 
@@ -100,22 +105,22 @@ class GUI3D(wx.App):
         self.Tg.Modify_TG_from_cell()
         event.Skip()   
     
-    def Calculations(self,writer):
-        """Call calculations modules"""
-        solver = Solver()
-        try:
-            with open("input_data.json", 'r') as f:
-                data = json.load(f)
-        except IOError as error:
-            self.Message_dialog("could not open input file input_data.json",wx.ICON_ERROR)
+    # def Calculations(self,writer):
+    #     """Call calculations modules"""
+    #     solver = Solver()
+    #     try:
+    #         with open("input_data.json", 'r') as f:
+    #             data = json.load(f)
+    #     except IOError as error:
+    #         self.Message_dialog("could not open input file input_data.json",wx.ICON_ERROR)
 
-        solver.solve(data)
+    #     solver.solve(data)
 
-        # Write to file
+    #     # Write to file
         
-        writer.WriteTensorsToFile(solver.InputData, solver.CMatTensor, solver.FlexMatTensor)
-        writer.WriteEffectivePropertiesToFile(solver.Bulk, solver.Ex, solver.Ey, solver.Poissonyx, solver.Poissonxy, solver.G,solver.rho)
-        writer.PlotEffectiveProperties(solver.Bulk, solver.Ex, solver.Ey, solver.Poissonyx, solver.Poissonxy, solver.G)
+    #     writer.WriteTensorsToFile(solver.InputData, solver.CMatTensor, solver.FlexMatTensor)
+    #     writer.WriteEffectivePropertiesToFile(solver.Bulk, solver.Ex, solver.Ey, solver.Poissonyx, solver.Poissonxy, solver.G,solver.rho)
+    #     writer.PlotEffectiveProperties(solver.Bulk, solver.Ex, solver.Ey, solver.Poissonyx, solver.Poissonxy, solver.G)
     
     def Message_results(self,path):
         try:
@@ -142,6 +147,8 @@ class GUI3D(wx.App):
         """menu Calculations Go"""  
         if self.Filename_json=="":
             self.Filename_json="input_data.json"
+
+        start_time = time.time()
         self.fs.Generate_json(self.Filename_json)
 
         try:
@@ -152,9 +159,18 @@ class GUI3D(wx.App):
             return
 
 #        self.Message(json.dumps(data, indent=4, sort_keys=False))
+        
+        # Profiling time code
+
 
         solver = Solver()
         solver.solve(data)
+        # The code to be evaluated
+        end_time = time.time()
+        # Time taken in seconds
+        time_taken = end_time - start_time
+        self.GUI.m_textCtrl2.AppendText("Exec time={}\n".format(time_taken))
+
         writer = Writer()
         writer.WriteTensorsToFile(solver.CMatTensor, solver.FlexMatTensor)
         writer.WriteEffectivePropertiesToFile(solver.Bulk, solver.Ex, solver.Ey, solver.Poissonyx, solver.Poissonxy, solver.G, solver.rho)
