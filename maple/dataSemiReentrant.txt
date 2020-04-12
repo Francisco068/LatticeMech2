@@ -1,0 +1,58 @@
+# toutes les expressions vectorielles sont dans le repere orthonorme (i,j)
+# def des vecteurs unitaires des barres
+s:=sin(theta);
+c:=cos(theta);
+nBarres:=6;
+
+# la valeur theta
+
+e[1]:=<0,1>;
+e[2]:=<c,-s>;
+e[3]:=<c,s>;
+e[4]:=<0,1>;
+e[5]:=e[3];
+e[6]:=-e[2];
+
+
+# def des vecteurs de pavage
+Y1:=<1,0>;
+Y2:=<0,1>;
+
+# norme des vecteurs de pavage
+L1:=2*L*c;
+L2:=2*L; 
+
+# nombre de noeuds
+nNoeuds:=4;
+
+# tableau des barres
+Ob:=[1,2,3,3,4,4];
+Eb:=[2,3,2,4,1,1];
+delta1:=[0,0,1,0,1,0];
+delta2:=[0,0,0,0,1,1];
+
+# ajout des valeurs de raideur pour chaque barres
+Iz=t^3/12;
+#kl1:=Es*t/L;
+#kl2:=Es*t/H;
+#kt1:=12*Es*Iz/L^3;
+#kt2:=12*Es*Iz/H^3;
+kl1:=Es/eta;
+kl2:=Es/eta;
+kt1:=Es/(eta^3);
+kt2:=Es/(eta^3);
+Kb:=[kl2,kl1,kl1,kl2,kl1,kl1];	# raideur en extension
+Kc:=[kt2,kt1,kt1,kt2,kt1,kt1];	# raideur en flexion 
+
+# ajout de la longueur de chaque barre
+#Lb:=[H,L,L,H,L,L];
+Lb:=[L,L,L,L,L,L];
+
+# ajout des volumes de chaque barre
+V1:=L*L/eta;
+#V2:=H*t;
+V2:=L*L/eta;
+Vb:=[V2,V1,V1,V2,V1,V1];
+
+# nom du fichier de sortie des resultats
+nomFichier:="sortiesemireentrant.txt";

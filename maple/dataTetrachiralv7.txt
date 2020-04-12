@@ -1,0 +1,65 @@
+# toutes les expressions vectorielles sont dans le repere orthonorme (i,j)
+# def des vecteurs unitaires des barres
+#theta:=15*Pi/180;
+#c:=evalf(cos(theta));
+#s:=evalf(sin(theta));
+#beta:=5/100;
+#L:=100;
+#Es:=210000;
+
+
+nBarres:=8;
+e[1]:=<c,-s>;
+e[2]:=<s,c>;
+e[3]:=e[1];
+e[4]:=e[2];
+e[5]:=e[2];
+e[6]:=e[1];
+e[7]:=e[1];
+e[8]:=e[2];
+
+# def des vecteurs de pavage
+Y1:=<1,0>;
+Y2:=<0,1>;
+
+# norme des vecteurs de pavage
+
+L1:=L;
+L2:=L;
+
+# nombre de noeuds
+nNoeuds:=6;
+
+# tableau des barres
+Ob:=[1,1,4,2,4,3,5,6];
+Eb:=[2,4,3,3,6,5,1,2];
+delta1:=[0,0,0,0,0,1,0,0];
+delta2:=[0,0,0,0,1,0,0,0];
+
+# ajout des valeurs de raideur pour chaque barres
+
+beta1:=beta/s;
+beta2:=2*beta/((c-s));
+
+
+kl1:=Es*t/(L*s);
+kf1:=simplify(Es*(t/(L*s))^3);
+kl2:=Es*2*t/(L*(c-s));
+kf2:=simplify(Es*((2*t/(L*(c-s)))^3));
+
+Kb:=[kl1,kl1,kl1,kl1,kl2,kl2,kl2,kl2];	# raideur en extension
+
+Kc:=[kf1,kf1,kf1,kf1,kf2,kf2,kf2,kf2];	# raideur sur l'effort tangent 
+
+# ajout de la longueur de chaque barre
+Lb1:=L*s;
+Lb2:=L*(c-s)/2;
+Lb:=[Lb1,Lb1,Lb1,Lb1,Lb2,Lb2,Lb2,Lb2];
+
+# ajout des volumes de chaque barre
+V1:=L*t;
+V2:=L*(c-s)*t/2;
+Vb:=[V1,V1,V1,V1,V2,V2,V2,V2];
+
+# nom du fichier de sortie des resultats
+nomFichier:="sortieTetrachiral7.txt";

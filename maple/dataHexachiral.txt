@@ -1,0 +1,48 @@
+# toutes les expressions vectorielles sont dans le repere orthonorme (i,j)
+# def des vecteurs unitaires des barres
+nBarres:=9;
+e[1]:=<1/2,sqrt(3)/2>;
+e[2]:=<-1/2,sqrt(3)/2>;
+e[3]:=<1,0>;
+e[4]:=<0,1>;
+e[7]:=e[4];
+e[5]:=<sqrt(3)/2,1/2>;
+e[8]:=e[5];
+e[6]:=<sqrt(3)/2,-1/2>;
+e[9]:=e[6];
+
+# def des vecteurs de pavage
+Y1:=e[5];
+Y2:=e[4];
+
+# norme des vecteurs de pavage
+L1:=2*L/sqrt(3);
+L2:=L1;
+
+# nombre de noeuds
+nNoeuds:=6;
+
+# tableau des barres
+Ob:=[1,6,2,6,1,2,4,5,6];
+Eb:=[4,3,5,1,2,3,3,4,5];
+delta1:=[0,-1,1,0,0,0,0,0,0];
+delta2:=[1,1,0,0,0,0,0,0,0];
+
+# ajout des valeurs de raideur pour chaque barres
+kl:=Es*t/L;
+kf:=Es*t^3/L^3;
+
+Kb:=[kl,kl,kl,(2*sqrt(3))*kl,(2*sqrt(3))*kl,(2*sqrt(3))*kl,(2*sqrt(3))*kl,(2*sqrt(3))*kl,(2*sqrt(3))*kl];	# raideur en extension
+
+Kc:=[kf,kf,kf,24*sqrt(3)*kf,24*sqrt(3)*kf,24*sqrt(3)*kf,24*sqrt(3)*kf,24*sqrt(3)*kf,24*sqrt(3)*kf];	# raideur sur l'effort tangent 
+
+# ajout de la longueur de chaque barre
+Lb:=[L,L,L,L/(2*sqrt(3)),L/(2*sqrt(3)),L/(2*sqrt(3)),L/(2*sqrt(3)),L/(2*sqrt(3)),L/(2*sqrt(3))];
+
+# ajout des volumes de chaque barre
+V1:=L*t;
+V2:=L*t/(2*sqrt(3));
+Vb:=[V1,V1,V1,V2,V2,V2,V2,V2,V2];
+
+# nom du fichier de sortie des resultats
+nomFichier:="sortieHexachiral.txt";

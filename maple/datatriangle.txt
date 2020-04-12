@@ -1,0 +1,38 @@
+# toutes les expressions vectorielles sont dans le repere orthonorme (i,j)
+# def des vecteurs unitaires des barres
+nBarres:=3;
+e[1]:=<1,0>;
+e[2]:=<1/2,sqrt(3)/2>;
+e[3]:=<-1/2,sqrt(3)/2>;
+# def des vecteurs de pavage
+Y1:=<1,0>;
+Y2:=<-1/2,sqrt(3)/2>;
+# norme des vecteurs de pavage
+L1:=L;
+L2:=L; 
+
+# nombre de noeuds
+nNoeuds:=1;
+
+# tableau des barres
+Ob:=[1,1,1];
+Eb:=[1,1,1];
+delta1:=[1,1,0];
+delta2:=[0,1,1];
+# ajout des valeurs de raideur pour chaque barres
+kb:=t*Es/L;
+kf:=Es*t^3/(L^3);
+#kb:=Es/eta;
+#kf:=Es/(eta^3);
+Kb:=[kb,kb,kb];
+Kc:=[kf,kf,kf];
+# ajout de la longueur de chaque barre
+Lb:=[L,L,L];
+
+# ajout des volumes de chaque barre
+V:=L*t;
+Vb:=[V,V,V];
+#section de chaque barres
+tb:=[t,t,t];
+# nom du fichier de sortie des resultats
+nomFichier:="sortieTriangle.txt";

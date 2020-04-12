@@ -1,7 +1,7 @@
 import wx
 import numpy as np
 from math_ext import *
-import copy
+from  Files_operations import *
 
 #"Profiles:"
 #" Profile.1:210,0.3,rect,0.1"
@@ -324,23 +324,33 @@ class elements(object):
         for i in self.periods:
             i.draw(dc,view)
     
-    def index_node(self,node):
+    def index_node(self,nodenumber: int):
         """return the node based on identifier value
         
         node: identifier value
         """
         for i in self.nodes:
-            if i.number==node:
+            if i.number==nodenumber:
                 return i
                 break
 
-    def index_profile(self,profile):
+    def index_profile(self,profilenumber: int):
         """return the profile based on identifier value
         
         profile : identifier value
         """
         for i in self.profiles:
-            if i.number==profile:
+            if i.number==profilenumber:
+                return i
+                break
+
+    def index_beam(self,beamnumber: int):
+        """return the profile based on identifier value
+        
+        profile : identifier value
+        """
+        for i in self.beams:
+            if i.number==beamnumber:
                 return i
                 break
 
@@ -412,3 +422,78 @@ class elements(object):
                 self.parent.Tg.Remove_tree_beam(numero)
                 break
         pass
+
+    def ReplaceElement(self,strdef: str):
+        """ Replace an element in the database"""
+
+        str1=strdef.split(':')
+        str10=str1[0].split('.')
+        #
+        TypeElement=str10[0]
+        number=int(str10[1])
+        if TypeElement=='Profile':
+            item=self.index_profile(number)
+            self.profiles[item]=self.Str2profile(strdef)
+
+        if TypeElement=='Y':  
+            self.periods[number-1]=self.Str2Y(strdef)       
+
+        if TypeElement=='N':        
+            item=self.index_node(number)
+            self.nodes[item]=self.Str2N(strdef)
+
+        if TypeElement=='beam':  
+            item=self.index_beam(number)
+            self.beams[item]=self.Str2beam(strdef,self)      
+
+    def Str2profile(self,str0: str):
+        str1=str0.split(':')
+        str10=str1[0].split('.')
+        str11=str1[1].split(',')
+        #
+        number=int(str10[1])
+        E=float(str11[0])
+        nu=float(str11[1])
+        section=str11[2]
+        width=float(str11[3])
+        #
+        return profile(number,E,nu,section,width)
+
+    def Str2Y(self,str0: str):
+        str1=str0.split(':')
+        str10=str1[0].split('.')
+        str11=str1[1].split(',')
+        #
+        x=float(str11[0])
+        y=float(str11[1])
+        vect=np.array([x,y])
+        vect1=normalize_vector(vect)
+        L=np.linalg.norm(vect)
+        #
+        return periodicity(vect1[0],vect1[1],L,int(str10[1]))
+
+    def Str2N(self,str0: str):
+        str1=str0.split(':')
+        str10=str1[0].split('.')
+        str11=str1[1].split(',')
+        #
+        x=float(str11[0])
+        y=float(str11[1])
+        #
+        return node(x,y,5,int(str10[1]))
+
+    def Str2beam(self,str0: str,EL):
+        str1=str0.split(':')
+        str10=str1[0].split('.')
+        str11=str1[1].split(',')
+        #
+        node_1=int(str11[0])
+        node_2=int(str11[1])
+        delta_1=int(str11[2])
+        delta_2=int(str11[3])
+        profile_=int(str11[4])
+        number=int(str10[1])
+        beam_=beam(node_1,node_2,delta_1,delta_2,profile_,0,0,0,0,0,number)
+        beam_.evaluate_k(EL)
+        #
+        return beam_

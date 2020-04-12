@@ -1,0 +1,39 @@
+# def des vecteurs unitaires des barres
+nBarres:=6;
+e[1]:=<sqrt(3)/2,1/2>;
+e[2]:=<0,1>;
+e[3]:=<sqrt(3)/2,-1/2>;
+e[4]:=-e[2];
+e[5]:=e[1];
+e[6]:=e[3];
+
+# def des vecteurs de pavage
+Y2:=<-1/2,sqrt(3)/2>;
+Y1:=<1/2,sqrt(3)/2>;
+
+# norme des vecteurs de pavage
+L1:=sqrt(3)*L;
+L2:=sqrt(3)*L; 
+
+# nombre de noeuds
+nNoeuds:=4;
+
+# tableau des barres
+Ob:=[2,3,2,3,1,1];
+Eb:=[1,1,3,2,3,2];
+delta1:=[1,1,0,0,0,0];
+delta2:=[0,0,0,-1,0,-1];
+
+# valeurs de raideur pour chaque barres
+kb:=t*Es/L;
+Iz:=t^3/12;
+kf:=Es*t^3/(L^3);
+Kb:=[kb,kb,kb,kb,kb,kb];
+Kc:=[kf,kf,kf,kf,kf,kf];
+
+# volume occuppé par chaque barre
+V:=t*L;
+Vb:=[V,V,V,V,V,V];
+
+# nom du fichier de sortie des resultats
+nomFichier:="sortieT-T.txt";

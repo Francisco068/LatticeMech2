@@ -1,0 +1,46 @@
+# toutes les expressions vectorielles sont dans le repere orthonorme (i,j)
+# def des vecteurs unitaires des barres
+theta:=15*Pi/180;
+s:=sin(theta);
+c:=cos(theta);
+nBarres:=2;
+
+e[1]:=<c,s>;
+e[2]:=<-c,s>;
+
+
+# def des vecteurs de pavage
+Y1:=e[1];
+Y2:=e[2];
+
+# norme des vecteurs de pavage
+L1:=L;
+L2:=L;
+
+# nombre de noeuds
+nNoeuds:=2;
+
+# tableau des barres
+Ob:=[1,1];
+Eb:=[1,1];
+delta1:=[1,0];
+delta2:=[0,1];
+
+# ajout des valeurs de raideur pour chaque barres
+kl:=E[s]*t/L;
+kf:=E[s]*(t/L)^3;
+#kl:=Es/eta;
+#kf:=Es/(eta^3);
+
+Kb:=[kl,kl];	# raideur en extension
+Kc:=[kf,kf];	# raideur sur l'effort tangent 
+
+# ajout de la longueur de chaque barre
+Lb:=[L,L];
+# ajout des volumes de chaque barre
+V1:=L*t;
+
+Vb:=[V1,V1];
+
+# nom du fichier de sortie des resultats
+nomFichier:="sortieDiamant.txt";

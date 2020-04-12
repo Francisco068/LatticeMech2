@@ -1,0 +1,44 @@
+# toutes les expressions vectorielles sont dans le repere orthonorme (i,j)
+# def des vecteurs unitaires des barres
+nBarres:=3;
+e[1]:=<0,1>;
+e[2]:=<sqrt(2)/2,sqrt(2)/2>;
+e[3]:=<-sqrt(2)/2,sqrt(2)/2>;
+
+# def des vecteurs de pavage
+Y1:=<(1/2)*sqrt(2)/sqrt(5+2*sqrt(2)),(1/2)*(4+sqrt(2))/sqrt(5+2*sqrt(2))>;
+Y2:=<-(1/2)*sqrt(2)/sqrt(5+2*sqrt(2)),(1/2)*(4+sqrt(2))/sqrt(5+2*sqrt(2))>;
+
+# norme des vecteurs de pavage
+L1:=sqrt(5+2*sqrt(2))*L;
+L2:=sqrt(5+2*sqrt(2))*L; 
+
+# nombre de noeuds
+nNoeuds:=2;
+
+# tableau des barres
+Ob:=[1,2,2];
+Eb:=[2,1,1];
+delta1:=[0,1,0];
+delta2:=[0,0,1];
+
+# ajout des valeurs de raideur pour chaque barres
+kl1:=Es*t/L;
+kf1:=Es*t^3/L^3;
+kl2:=Es*t/(2*L);
+kf2:=Es*t^3/(2*L)^3;
+Kb:=[kl2,kl1,kl1];	# raideur en extension
+Kc:=[kf2,kf1,kf1];	# raideur sur l'effort tangent 
+
+# ajout de la longueur de chaque barre
+Lb:=[2*L,L,L];
+
+# ajout des volumes de chaque barre
+V1:=L*t;
+V2:=2*L*t;
+Vb:=[V2,V1,V1];
+
+lambda:=0;
+
+# nom du fichier de sortie des resultats
+nomFichier:="sortieHexagone2.txt";

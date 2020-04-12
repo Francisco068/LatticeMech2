@@ -1,0 +1,63 @@
+# toutes les expressions vectorielles sont dans le repere orthonorme (i,j)
+# def des vecteurs unitaires des barres
+
+nBarres:=15;
+e[1]:=<1/2,sqrt(3)/2>;
+e[2]:=e[1];
+e[3]:=<-1/2,sqrt(3)/2>;
+e[4]:=<1,0>;
+e[5]:=e[4];
+e[6]:=e[3];
+e[7]:=e[1];
+e[8]:=e[3];
+e[9]:=e[4];
+e[10]:=e[4];
+e[11]:=e[1];
+e[12]:=e[3];
+e[13]:=e[4];
+e[14]:=e[1];
+e[15]:=-e[3];
+
+# def des vecteurs de pavage
+Y1:=<1,0>;
+Y2:=<-1/2,sqrt(3)/2>;
+
+# norme des vecteurs de pavage
+
+L1:=6*L;
+L2:=6*L;
+
+# nombre de noeuds
+nNoeuds:=12;
+
+# tableau des barres
+Ob:=[7,6,1,1,5,3,2,4 ,2,8,10,11,11,12,9];
+Eb:=[6,5,6,2,4,4,3,11,8,9,8 ,10,12,7 ,7];
+delta1:=[0,0,0,0,0,0,0,0,0,0,0,0,0,1,1];
+delta2:=[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0];
+
+# ajout des valeurs de raideur pour chaque barres
+beta1:=beta;
+beta2:=beta/2;
+
+kl1:=Es*t/L;
+kf1:=simplify(Es*((t/L)^3));
+kl2:=Es*(t/(2*L));
+kf2:=simplify(Es*((t/(2*L))^3));
+
+Kb:=[kl2,kl1,kl1,kl1,kl1,kl1,kl1,kl2,kl2,kl1,kl1,kl1,kl1,kl1,kl1];	# raideur en extension
+
+Kc:=[kf2,kf1,kf1,kf1,kf1,kf1,kf1,kf2,kf2,kf1,kf1,kf1,kf1,kf1,kf1];	# raideur sur l'effort tangent 
+
+# ajout de la longueur de chaque barre
+Lb1:=L;
+Lb2:=2*L;
+Lb:=[Lb2,Lb1,Lb1,Lb1,Lb1,Lb1,Lb1,Lb2,Lb2,Lb1,Lb1,Lb1,Lb1,Lb1,Lb1];
+
+# ajout des volumes de chaque barre
+V1:=L*t;
+V2:=2*L*t;
+Vb:=[V2,V1,V1,V1,V1,V1,V1,V2,V2,V1,V1,V1,V1,V1,V1];
+
+# nom du fichier de sortie des resultats
+nomFichier:="sortieTrichiral.txt";

@@ -3,7 +3,6 @@
 Read of input in the specified data format
 """
 import json
-from jsonschema import validate
 
 
 def ReadInpDataJSON(data):

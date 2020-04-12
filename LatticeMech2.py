@@ -6,9 +6,8 @@ from lattice_objects import *
 from Files_operations import *
 from Tree_Grid import *
 import json
-
 import time
-
+from FDR_Solver import *
 
 from DiscreteLatticeMech.DiscreteLatticeMechCore import Solver, Writer
 
@@ -64,7 +63,7 @@ class GUI3D(wx.App):
         # initialise File system
         self.fs=Files_system(self)
         # initialise TreeCtrl and Grid operations
-        self.Tg=Tree_Grid_operations(self,self.GUI.m_treeCtrl1,self.GUI.m_grid1)
+        self.Tg=Tree_Grid_operations(self.GUI.m_treeCtrl1,self.GUI.m_grid1,self.EL)
         self.Tg.Grid_init()
         self.Tg.TreeCtrl_init()
         # end of user added elements 
@@ -102,7 +101,10 @@ class GUI3D(wx.App):
     
     def Cell_changed(self, event): #from menu
         """Action when cell changed"""  
-        self.Tg.Modify_TG_from_cell()
+        str1=self.Tg.Modify_TG_from_cell(self.GUI.m_panel1)
+        self.EL.ReplaceElement(str1)
+        self.FileSaved=False
+        self.GUI.m_panel3.Refresh()
         event.Skip()   
     
     # def Calculations(self,writer):
@@ -149,7 +151,7 @@ class GUI3D(wx.App):
             self.Filename_json="input_data.json"
 
         start_time = time.time()
-        self.fs.Generate_json(self.Filename_json)
+        self.fs.Generate_json(self.Filename_json,self)
 
         try:
             with open(self.Filename_json, 'r') as f:
@@ -162,9 +164,9 @@ class GUI3D(wx.App):
         
         # Profiling time code
 
-
-        solver = Solver()
-        solver.solve(data)
+        sol=solverFDR(self.EL)
+        # solver = Solver()
+        # solver.solve(data)
         # The code to be evaluated
         end_time = time.time()
         # Time taken in seconds
@@ -245,7 +247,9 @@ class GUI3D(wx.App):
             myfile.close()
             return
         
-        self.fs.Open_xml(tree)
+        self.fs.Open_xml(tree, self.GUI.m_treeCtrl1,self.EL)
+        self.File_saved=True
+        self.Filename_defined=True
         myfile.close()
         event.Skip()
 
@@ -311,7 +315,7 @@ class GUI3D(wx.App):
         str2=str[len(str)-1]
         if str2=="json":
             self.Filename_json=file
-            self.fs.Generate_json(file)
+            self.fs.Generate_json(file, self)
         if str2=="txt":
             self.Filename_txt=file
             self.fs.Generate_txt(file)

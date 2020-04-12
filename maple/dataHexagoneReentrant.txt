@@ -1,0 +1,51 @@
+# toutes les expressions vectorielles sont dans le repere orthonorme (i,j)
+# def des vecteurs unitaires des barres
+s:=sin(theta);
+c:=cos(theta);
+
+nBarres:=3;
+e[1]:=<0,1>;
+e[2]:=<c,s>;
+e[3]:=<-c,s>;
+
+# def des vecteurs de pavage
+Lp:=L*sqrt(2*(s+1));
+lx:=simplify(L*c/Lp);
+ly:=simplify(L*(1+s)/Lp);
+Y1:=<lx,ly>;
+Y2:=<-lx,ly>;
+
+# norme des vecteurs de pavage
+
+L1:=Lp;
+L2:=Lp;
+
+# nombre de noeuds
+nNoeuds:=2;
+
+# tableau des barres
+Ob:=[2,1,1];
+Eb:=[1,2,2];
+delta1:=[0,1,0];
+delta2:=[0,0,1];
+
+# ajout des valeurs de raideur pour chaque barres
+#raideurs en flexion et traction
+kf:=Es*t^3/L^3;
+kt:=Es*t/L;
+#kf:=Es/(eta^3);
+#kt:=Es/eta;
+
+
+Kb:=[kt,kt,kt];	# raideur en traction
+Kc:=[kf,kf,kf];	# raideur en flexion 
+
+# ajout de la longueur de chaque barre
+Lb:=[L,L,L];
+
+# ajout des volumes de chaque barre
+V:=L*t;
+Vb:=[V,V,V];
+
+# nom du fichier de sortie des resultats
+nomFichier:="sortieHexagonereentrant.txt";
