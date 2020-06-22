@@ -8,8 +8,11 @@ from Tree_Grid import *
 import json
 import time
 from FDR_Solver import *
+import xml.etree.ElementTree as ET
 
 from DiscreteLatticeMech.DiscreteLatticeMechCore import Solver, Writer
+
+# todo : quand je change la longueur des vecteurs de base, il faut que je pense à recalculer les longueurs et modules de toutes les poutres !
 
 class GUI3D(wx.App):
     
@@ -62,10 +65,11 @@ class GUI3D(wx.App):
         self.Bind(wx.EVT_SIZE, self.Graph_resize, self.GUI.m_panel3)        
         # initialise File system
         self.fs=Files_system(self)
-        # initialise TreeCtrl and Grid operations
+        # initialise TreeCtrl, Grid and elements
         self.Tg=Tree_Grid_operations(self.GUI.m_treeCtrl1,self.GUI.m_grid1,self.EL)
         self.Tg.Grid_init()
         self.Tg.TreeCtrl_init()
+        self.EL.Elements_init()
         # end of user added elements 
         self.GUI.Show()
         self.Canvas2D.Refresh()
@@ -147,10 +151,12 @@ class GUI3D(wx.App):
 
     def Calculations_go(self, event): #from menu
         """menu Calculations Go"""  
+        for i in self.EL.beams:
+            i.evaluate_k(self.EL)
         if self.Filename_json=="":
             self.Filename_json="input_data.json"
 
-        start_time = time.time()
+
         self.fs.Generate_json(self.Filename_json,self)
 
         try:
@@ -163,6 +169,7 @@ class GUI3D(wx.App):
 #        self.Message(json.dumps(data, indent=4, sort_keys=False))
         
         # Profiling time code
+        start_time = time.time()
 
         sol=solverFDR(self.EL)
         # solver = Solver()
@@ -173,12 +180,12 @@ class GUI3D(wx.App):
         time_taken = end_time - start_time
         self.GUI.m_textCtrl2.AppendText("Exec time={}\n".format(time_taken))
 
-        writer = Writer()
-        writer.WriteTensorsToFile(solver.CMatTensor, solver.FlexMatTensor)
-        writer.WriteEffectivePropertiesToFile(solver.Bulk, solver.Ex, solver.Ey, solver.Poissonyx, solver.Poissonxy, solver.G, solver.rho)
-        writer.PlotEffectiveProperties(solver.Bulk, solver.Ex, solver.Ey, solver.Poissonyx, solver.Poissonxy, solver.G)
+        # writer = Writer()
+        # writer.WriteTensorsToFile(solver.CMatTensor, solver.FlexMatTensor)
+        # writer.WriteEffectivePropertiesToFile(solver.Bulk, solver.Ex, solver.Ey, solver.Poissonyx, solver.Poissonxy, solver.G, solver.rho)
+        # writer.PlotEffectiveProperties(solver.Bulk, solver.Ex, solver.Ey, solver.Poissonyx, solver.Poissonxy, solver.G)
 
-        self.Message_results(writer.folder)
+        # self.Message_results(writer.folder)
  
         event.Skip()
 
@@ -253,27 +260,24 @@ class GUI3D(wx.App):
         myfile.close()
         event.Skip()
 
-    def Define_filename(self,s : str):
+    def Define_filename(self):
         with wx.FileDialog(self.GUI, wildcard = "xml file (*.xml)|*.xml", 
             style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT) as fileDialog:
 
             if fileDialog.ShowModal() == wx.ID_CANCEL:
                 return ""    
             s=fileDialog.GetPath()
-            return fileDialog.GetPath()
+            return s
     
     def File_save(self, event):
         """menu file save
         Save the current project in xml"""
         if not(self.Filename_defined):
-            s="Save file"
-            self.Filename=self.Define_filename(s)
+            self.Filename=self.Define_filename()
             if self.Filename=="":
-                self.parent.Message("Error : can not use Filename ")
-                return -1
-            else:
-                self.Filename_defined=True
-                self.fs.Save_xml(self.GUI.m_treeCtrl1,self.Filename)
+                self.Filename="data1.xml"
+            self.Filename_defined=True
+        self.fs.Save_xml(self.GUI.m_treeCtrl1,self.Filename)
         event.Skip()
 
     def Define_filename_export(self):
@@ -290,8 +294,8 @@ class GUI3D(wx.App):
     def File_save_as(self, event):
         """menu file save as
         Save the current project in xml"""
-        s="Save file as"
-        self.Filename=self.Define_filename(s)
+
+        self.Filename=self.Define_filename()
         if self.Filename=="":
             self.Message("Error : can not use Filename ")
             return -1
@@ -318,7 +322,7 @@ class GUI3D(wx.App):
             self.fs.Generate_json(file, self)
         if str2=="txt":
             self.Filename_txt=file
-            self.fs.Generate_txt(file)
+            self.fs.Generate_txt(file,self)
 
         event.Skip()
 

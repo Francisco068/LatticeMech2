@@ -145,6 +145,8 @@ class node(object):
 #" beam.1:1,1,1,0,1"
 #" beam.number:node_1,node_2,delta_1,delta_2,profile"
 class beam(object):
+# todo : modifier la définition de classe
+# insérer la largeur comme attribut dans les poutres
     """Class for object: beam 
     
     node_1: identifier of node 1 
@@ -186,9 +188,9 @@ class beam(object):
         parent: class element (parent)
         """
         
-        N1=parent.index_node(self.node_1)
-        N2=parent.index_node(self.node_2)
-        prof=parent.index_profile(self.profile)
+        N1=parent.index_node(self.node_1)[0]
+        N2=parent.index_node(self.node_2)[0]
+        prof=parent.index_profile(self.profile)[0]
 
         material_E=prof.E
         width=prof.width
@@ -217,11 +219,11 @@ class beam(object):
         dc: drawing functions
         view: graphic window
         """
-        prof=parent.index_profile(self.profile)
+        prof=parent.index_profile(self.profile)[0]
         width=view.zoom*prof.width
 
-        N1=parent.index_node(self.node_1)
-        N2=parent.index_node(self.node_2)
+        N1=parent.index_node(self.node_1)[0]
+        N2=parent.index_node(self.node_2)[0]
         Y1W=np.array([parent.periods[0].x,parent.periods[0].y])*parent.periods[0].length
         Y2W=np.array([parent.periods[1].x,parent.periods[1].y])*parent.periods[1].length
 
@@ -286,26 +288,27 @@ class elements(object):
         self.beams=[]
         self.periods=[]
         self.profiles=[]
+        self.InitAll()
+
+    def InitAll(self):
+        self.nodes=[]
+        self.beams=[]
+        self.periods=[]
+        self.profiles=[]
         self.Mode="ADD_POINT"
         self.P1_acquired=node(0,0,5,0)
         self.P1_acquired_bool=False
         self.P1_acquired.focused=False
         self.active_profile=1
+
+    def Elements_init(self):
         self.periods.append(periodicity(1,0,1,1))
         self.periods.append(periodicity(0,1,1,2))
         self.nodes.append(node(0,0,5,1))
-        self.profiles.append(profile(1,210,0.3,"rect",0.1))
+        self.profiles.append(profile(1,210000,0.3,"rect",0.3))
 
     def Delete_all_items(self):
-        self.nodes=[]
-        self.beams=[]
-        self.periods=[]
-        self.Mode="ADD_POINT"
-        self.P1_acquired=node(0,0,5,0)
-        self.P1_acquired_bool=False
-        self.P1_acquired.focused=False
-        self.active_profile=0
-
+        self.InitAll()
     
     def draw(self,dc,view):
         """draw all objects : nodes, beams, periodicity vectors
@@ -329,36 +332,88 @@ class elements(object):
         
         node: identifier value
         """
+        index=0
         for i in self.nodes:
             if i.number==nodenumber:
-                return i
+                return i,index
                 break
+            index+=1
 
     def index_profile(self,profilenumber: int):
         """return the profile based on identifier value
         
         profile : identifier value
         """
+        index=0
         for i in self.profiles:
             if i.number==profilenumber:
-                return i
+                return i,index
                 break
+            index+=1
 
     def index_beam(self,beamnumber: int):
         """return the profile based on identifier value
         
         profile : identifier value
         """
+        index=0
         for i in self.beams:
             if i.number==beamnumber:
-                return i
+                return i, index
                 break
+            index+=1
+    
+    def Search_max_number(self,Tarray):
+        index=1
+        for i in Tarray:
+            if index<=i.number:
+                index=i.number
+                item=i
+        return index, item
+    
+    def Replace_node_in_beams(self,old,new):
+        for i in self.beams:
+            if i.node_1==old:
+                i.node_1=new
+            if i.node_2==old:
+                i.node_2=new  
+    
+    def Fill_voids(self):
+        # beams fill voids
+        f=True
+        while f:
+            max_beam=self.Search_max_number(self.beams)
+            if max_beam[0]>len(self.beams):
+                void_beam=self.Search_first_free(self.beams)
+                max_beam[1].number=void_beam
+            else:
+                f=False
+        # nodes fill voids
+        f=True
+        while f:
+            max_node=self.Search_max_number(self.nodes)
+            if max_node[0]>len(self.nodes):
+                void_node=self.Search_first_free(self.nodes)
+                max_node[1].number=void_node
+                self.Replace_node_in_beams(max_node[0],void_node)
+            else:
+                f=False
+    
+    def Search_first_free(self,Tarray):
+        index=1
+        f=True
+        while (f):
+            f=False
+            for i in Tarray:
+                if index==i.number:
+                    index+=1
+                    f=True
+                    break
+        return index
+
 
     def Add_node(self,Pos_world):
-        numero=0
-        for i in self.nodes:
-            if i.number >= numero :
-                numero=i.number+1
+        numero=self.Search_first_free(self.nodes)
         node1=node(Pos_world[0],Pos_world[1],5,numero)
         self.nodes.append(node1)
         self.parent.Tg.Add_tree_node(node1)
@@ -378,10 +433,7 @@ class elements(object):
             for i in self.nodes:
                 if i.focused==True:
                     self.Mode="ADD_BEAM_P1"
-                    numero=1
-                    for j in self.beams:
-                        if numero<=j.number:
-                            numero=j.number+1
+                    numero=self.Search_first_free(self.beams)
                     #beam : (node_1,node_2,delta_1,delta_2,profile,length,e_x,e_y,ka,kb,number):
                     beam1=beam(self.P1_acquired.number,i.number,i.delta_1_focus,i.delta_2_focus,self.active_profile,\
                         0,0,0,0,0,numero)
@@ -432,19 +484,19 @@ class elements(object):
         TypeElement=str10[0]
         number=int(str10[1])
         if TypeElement=='Profile':
-            item=self.index_profile(number)
-            self.profiles[item]=self.Str2profile(strdef)
+            index=self.index_profile(number)[1]
+            self.profiles[index]=self.Str2profile(strdef)
 
-        if TypeElement=='Y':  
+        if TypeElement=='Y':
             self.periods[number-1]=self.Str2Y(strdef)       
 
         if TypeElement=='N':        
-            item=self.index_node(number)
-            self.nodes[item]=self.Str2N(strdef)
+            index=self.index_node(number)[1]
+            self.nodes[index]=self.Str2N(strdef)
 
         if TypeElement=='beam':  
-            item=self.index_beam(number)
-            self.beams[item]=self.Str2beam(strdef,self)      
+            index=self.index_beam(number)[1]
+            self.beams[index]=self.Str2beam(strdef,self)      
 
     def Str2profile(self,str0: str):
         str1=str0.split(':')
@@ -497,3 +549,4 @@ class elements(object):
         beam_.evaluate_k(EL)
         #
         return beam_
+

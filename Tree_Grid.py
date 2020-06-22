@@ -96,7 +96,7 @@ class Tree_Grid_operations():
 
         if (str_4[0]=="Profile"):
             self.Set_grid_perso(["E","nu","section","width"],str_3[0],str_5)
-            EL.active_profile=int(str_4[1])
+            self.EL.active_profile=int(str_4[1])
 
         if (str_4[0].strip()=="Y"):
             self.Set_grid_perso(["X","Y"],str_3[0],str_5)
@@ -200,9 +200,9 @@ class Tree_Grid_operations():
         name=RowLabel.split('.')
         number=int(name[1])
         str1=""
-        for i in range(self.grid.GetNumberRows()+1):
+        for i in range(self.grid.GetNumberCols()):
             str1=str1+self.grid.GetCellValue(0,i)
-            if i!=self.grid.GetNumberRows():
+            if i!=(self.grid.GetNumberCols()-1):
                 str1=str1+','
         str1=RowLabel+':'+str1
         self.ReplaceTreeCtrl(RowLabel,str1)
@@ -303,5 +303,5 @@ class Tree_Grid_operations():
         self.tree.AppendItem(BasisId, "Y.1:1,0")
         self.tree.AppendItem(BasisId, "Y.2:0,1")
         self.tree.AppendItem(NodesId, "N.1:0,0")
-        self.tree.AppendItem(ProfilId, "Profile.1:210,0.3,rect,0.1")
+        self.tree.AppendItem(ProfilId, "Profile.1:210000,0.3,rect,0.3")
         self.tree.ExpandAll()

@@ -1,16 +1,16 @@
 # toutes les expressions vectorielles sont dans le repere orthonorme (i,j)
 # def des vecteurs unitaires des barres
 nBarres:=2; 
-e[1]:=<1,0>;
+e[1]:=<0.8090169943,0.587785252>;
 e[2]:=<0,1>;
 
 # def des vecteurs de pavage
-Y1:=<1,0>;
+Y1:=<0.8090169943,0.587785252>;
 Y2:=<0,1>;
 
 # norme des vecteurs de pavage
-L1:=10;
-L2:=15; 
+L1:=1;
+L2:=1; 
 
 # nombre de noeuds
 nNoeuds:=1;
@@ -24,8 +24,8 @@ delta2:=[0,1];
 # ajout des valeurs de raideur pour chaque barres
 Es:=210000;
 t:=0.3;
-LAA:=10;
-LBB:=15;
+LAA:=1;
+LBB:=1;
 kta:=Es*t/LAA;
 kfa:=Es*t^3/LAA^3;
 ktb:=Es*t/LBB;

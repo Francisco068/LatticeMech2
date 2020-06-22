@@ -43,7 +43,7 @@ def ReadInpDataJSON(data):
     # print(schema)
     # print(json.dumps(schema, indent=4, sort_keys=True))
 
-    validate(data, schema)
+    # validate(data, schema)
 
     DirectionVectors = []
     PeriodicityVectors = [[0.0] * 2 for _ in range(2)]
@@ -62,7 +62,7 @@ def ReadInpDataJSON(data):
         DirectionVectors.append([0.0] * 2)
         DirectionVectors[i-1][0] = DirectVector[0]
         DirectionVectors[i-1][1] = DirectVector[1]
-        print(DirectVector)
+        # print(DirectVector)
 
     PeriodVect = data["Y_1"]
     PeriodicityVectors[0][0] = PeriodVect[0]

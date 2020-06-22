@@ -1,4 +1,4 @@
-﻿# toutes les expressions vectorielles sont dans le repere orthonorme (i,j)
+# toutes les expressions vectorielles sont dans le repere orthonorme (i,j)
 # def des vecteurs unitaires des barres
 nBarres:=2; 
 e[1]:=<1,0>;

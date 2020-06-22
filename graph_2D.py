@@ -234,9 +234,9 @@ class Graph_window(wx.Window):
                 else:
                     i.focused=False
             for i in self.EL.beams:
-                N1=self.EL.index_node(i.node_1)
-                N2=self.EL.index_node(i.node_2)
-                prof=self.EL.index_profile(i.profile)
+                N1=self.EL.index_node(i.node_1)[0]
+                N2=self.EL.index_node(i.node_2)[0]
+                prof=self.EL.index_profile(i.profile)[0]
                 Y1=self.EL.periods[0]
                 Y2=self.EL.periods[1]
                 Y1W=np.array([Y1.x,Y1.y])*Y1.length

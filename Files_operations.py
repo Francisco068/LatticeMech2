@@ -34,7 +34,7 @@ class Files_system():
                     EL.nodes.append(EL.Str2N(str0))
 
                 if str10[0]=="beam":
-                    EL.beams.append(EL.Str2beam(str0),EL)
+                    EL.beams.append(EL.Str2beam(str0,EL))
 
         treeCtrl.ExpandAll()
 
@@ -136,7 +136,7 @@ class Files_system():
         str_tb="\"tb\": ["
         for i in parent.EL.beams:
             str_Lb=str_Lb+str(i.length)+','
-            prof=parent.EL.index_profile(i.profile)
+            prof=parent.EL.index_profile(i.profile)[0]
             str_tb=str_tb+str(prof.width)+','
         str_Lb=str_Lb[0:len(str_Lb)-1]+"],\n"
         str_tb=str_tb[0:len(str_tb)-1]+"],\n"
@@ -153,75 +153,85 @@ class Files_system():
         myfile.close()
         return 0
 
-    def Generate_txt(self,file):
-   
+    def Generate_txt(self,file,parent: GUI3D):
+
+        parent.EL.Fill_voids()
+
         myfile=open(file,"w+")
         # Write number of elements
         myfile.write("# Define the number of elements\n")
-        Number_beams=len(self.parent.EL.beams)
+        Number_beams=len(parent.EL.beams)
         if (Number_beams<1):
-            self.parent.Message_dialog("Error:There's no beam",wx.ICON_ERROR)
+            self.Message_dialog("Error:There's no beam",wx.ICON_ERROR)
             myfile.close()
             return -1
-        myfile.write("NumberElements= %i\n" % Number_beams)
+        myfile.write("nBarres:= %i;\n" % Number_beams)
         # Write the direction vectors of each element
         myfile.write("# Define the direction vectors of each element\n")
-        for i in self.parent.EL.beams:
-            myfile.write("e_%i=[%6.4f,%6.4f]\n" % (i.number,i.e_x,i.e_y))
+        for i in parent.EL.beams:
+            myfile.write("e[%i]:=[%10e,%10e];\n" % (i.number,i.e_x,i.e_y))
+
         # Write basis periodicity vectors
         myfile.write("# define the global periodicity vectors\n")
-        for i in self.parent.EL.periods:
-            myfile.write("Y_%i=[%6.4f,%6.4f]\n" % (i.number,i.x,i.y))
+        for i in parent.EL.periods:
+            myfile.write("Y%i:=<%10e,%10e>;\n" % (i.number,i.x,i.y))
+        
+        # Write norme of the periodicity vectors
+        myfile.write("# Norme of the periodicity vectors\n")
+        for i in parent.EL.periods:
+            myfile.write("L%i:=%10e;\n" % (i.number,i.length))
+
         # Write number node
         myfile.write("# number of inner nodes\n")
-        Number_nodes=len(self.parent.EL.nodes)
-        myfile.write("NumberNodes= %i\n" % Number_nodes)
+        Number_nodes=len(parent.EL.nodes)
+        myfile.write("nNoeuds:= %i;\n" % Number_nodes)
+
         # Write List of origin and end points along with delta
         myfile.write("# List of origin and end points along with delta\n")
-        str_Ob="Ob=["
-        str_Eb="Eb=["
-        str_Delta1="Delta1=["
-        str_Delta2="Delta2=["
-        for i in self.parent.EL.beams:
+        str_Ob="Ob:=["
+        str_Eb="Eb:=["
+        str_Delta1="delta1:=["
+        str_Delta2="delta2:=["
+        for i in parent.EL.beams:
             str_Ob=str_Ob+str(i.node_1)+','
             str_Eb=str_Eb+str(i.node_2)+','
             str_Delta1=str_Delta1+str(i.delta_1)+','
             str_Delta2=str_Delta2+str(i.delta_2)+','
-        str_Ob=str_Ob[0:len(str_Ob)-1]+"]\n"
-        str_Eb=str_Eb[0:len(str_Eb)-1]+"]\n"
-        str_Delta1=str_Delta1[0:len(str_Delta1)-1]+"]\n"
-        str_Delta2=str_Delta2[0:len(str_Delta2)-1]+"]\n"
+        str_Ob=str_Ob[0:len(str_Ob)-1]+"];\n"
+        str_Eb=str_Eb[0:len(str_Eb)-1]+"];\n"
+        str_Delta1=str_Delta1[0:len(str_Delta1)-1]+"];\n"
+        str_Delta2=str_Delta2[0:len(str_Delta2)-1]+"];\n"
         myfile.write(str_Ob)
         myfile.write(str_Eb)
         myfile.write(str_Delta1)
         myfile.write(str_Delta2)
         # Write list of element axial and bending stiffness
         myfile.write("# List of element axial and bending stiffness\n")
-        str_Ka="Ka=["
-        str_Kb="Kb=["
-        for i in self.parent.EL.beams:
-            str_Ka=str_Ka+str(i.ka)+','
-            str_Kb=str_Kb+str(i.kb)+','
-        str_Ka=str_Ka[0:len(str_Ka)-1]+"]\n"
-        str_Kb=str_Kb[0:len(str_Kb)-1]+"]\n"
+        str_Ka="Kb:=["
+        str_Kb="Kc:=["
+        for i in parent.EL.beams:
+            str_Ka=str_Ka+"%10e" % i.ka +','
+            str_Kb=str_Kb+"%10e" % i.kb+','
+        str_Ka=str_Ka[0:len(str_Ka)-1]+"];\n"
+        str_Kb=str_Kb[0:len(str_Kb)-1]+"];\n"
         myfile.write(str_Ka)
         myfile.write(str_Kb)
         # Write list of element lengths and volumes
         myfile.write("# List of element lengths and volumes\n")
-        str_Lb="Lb=["
-        str_tb="tb=["
-        for i in self.parent.EL.beams:
-            str_Lb=str_Lb+str(i.length)+','
-            prof=self.parent.EL.index_profile(i.profile)
-            str_tb=str_tb+str(prof.width)+','
-        str_Lb=str_Lb[0:len(str_Lb)-1]+"]\n"
-        str_tb=str_tb[0:len(str_tb)-1]+"]\n"
+        str_Lb="Lb:=["
+        str_tb="Tb:=["
+        str_Vb="Vb:=["
+        for i in parent.EL.beams:
+            str_Lb=str_Lb+"%10e" % i.length+','
+            prof=parent.EL.index_profile(i.profile)[0]
+            str_tb=str_tb+"%10e" % prof.width+','
+            str_Vb=str_Vb+"%10e" % (i.length*prof.width)+','
+        str_Lb=str_Lb[0:len(str_Lb)-1]+"];\n"
+        str_tb=str_tb[0:len(str_tb)-1]+"];\n"
+        str_Vb=str_Vb[0:len(str_Vb)-1]+"];\n"
         myfile.write(str_Lb)
         myfile.write(str_tb)
-        # Write norme of the periodicity vectors
-        myfile.write("# Norme of the periodicity vectors\n")
-        for i in self.parent.EL.periods:
-            myfile.write("L%i=%6.4f\n" % (i.number,i.length))
+        myfile.write(str_Vb)
         myfile.close()
         return 0
 

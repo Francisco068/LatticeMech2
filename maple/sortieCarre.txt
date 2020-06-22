@@ -1,0 +1,37 @@
+Fichier : sortieCarre.txt
+type de symetrie : Tetragonal
+densité relative rho=2./L*t
+module de compressibilité hydrostatique K=.5000000000*Es*t/L
+module d'élasticité suivant x Ex=Es*t/L
+module d'élasticité suivant y Ey=Es*t/L
+module de cisaillement G=muxy=.5000000000*Es*t^3/L^3
+coefficient de Poisson nuyx=0.
+coefficient de Poisson nuxy=0.
+coefficient de couplage etax,xy=0.
+coefficient de couplage etay,xy=0.
+coefficient de couplage etaxy,x=0.
+coefficient de couplage etaxy,y=0.
+
+Sortie latex :
+$\rho= 2.0\,{\frac {t}{L}}$
+
+$K= 0.5000000000\,{\frac {{\it Es}\,t}{L}}$
+
+$E_x={\frac {{\it Es}\,t}{L}}$
+
+$E_y={\frac {{\it Es}\,t}{L}}$
+
+$G=\mu_{xy}= 0.5000000000\,{\frac {{\it Es}\,{t}^{3}}{{L}^{3}}}$
+
+$\nu_{yx}= 0.0$
+
+$\nu_{xy}= 0.0$
+
+$\eta_{x,xy}= 0.0$
+
+$\eta_{y,xy}= 0.0$
+
+$\eta_{xy,x}= 0.0$
+
+$\eta_{xy,y}= 0.0$
+
