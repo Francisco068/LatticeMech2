@@ -1,0 +1,29 @@
+# Define the number of elements
+nBarres:= 6;
+# Define the direction vectors of each element
+e[1]:=[7.071068e-01,7.071068e-01];
+e[2]:=[7.071068e-01,7.071068e-01];
+e[3]:=[-7.071068e-01,7.071068e-01];
+e[4]:=[-7.071068e-01,7.071068e-01];
+e[5]:=[7.082059e-01,7.060059e-01];
+e[6]:=[-7.060059e-01,7.082059e-01];
+# define the global periodicity vectors
+Y1:=<1.000000e+00,0.000000e+00>;
+Y2:=<0.000000e+00,1.000000e+00>;
+# Norme of the periodicity vectors
+L1:=1.414200e+01;
+L2:=1.414200e+01;
+# number of inner nodes
+nNoeuds:= 5;
+# List of origin and end points along with delta
+Ob:=[3,1,1,5,5,2];
+Eb:=[1,2,4,1,4,3];
+delta1:=[0,0,0,0,1,0];
+delta2:=[0,0,0,0,0,1];
+# List of element axial and bending stiffness
+Kb:=[2.103292e+04,2.103292e+04,2.103292e+04,2.103292e+04,1.050009e+04,1.050009e+04];
+Kc:=[2.109892e+02,2.109892e+02,2.109892e+02,2.109892e+02,2.625066e+01,2.625066e+01];
+# List of element lengths and volumes
+Lb:=[4.992174e+00,4.992174e+00,4.992174e+00,4.992174e+00,9.999916e+00,9.999916e+00];
+Tb:=[5.000000e-01,5.000000e-01,5.000000e-01,5.000000e-01,5.000000e-01,5.000000e-01];
+Vb:=[2.496087e+00,2.496087e+00,2.496087e+00,2.496087e+00,4.999958e+00,4.999958e+00];
