@@ -1,7 +1,7 @@
 import wx   
 from wx3.GUI_Forms import *
 from LatticeMech2 import *
-from lattice_objects import *
+from latticeObjects import *
 
 class Tree_Grid_operations():
     # def __init__(self,tree: wx.TreeCtrl,grid: wx.grid.Grid,EL: elements):

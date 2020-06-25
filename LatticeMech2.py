@@ -2,7 +2,7 @@ from wx3.GUI_Forms import *
 from canvas_opengl import *
 from math_ext import *
 from graph_2D import *
-from lattice_objects import *
+from latticeObjects import *
 from Files_operations import *
 from Tree_Grid import *
 import json
@@ -13,6 +13,7 @@ import xml.etree.ElementTree as ET
 from DiscreteLatticeMech.DiscreteLatticeMechCore import Solver, Writer
 
 # todo : quand je change la longueur des vecteurs de base, il faut que je pense à recalculer les longueurs et modules de toutes les poutres !
+# todo : de même quand je change une composante du profil !
 
 class GUI3D(wx.App):
     

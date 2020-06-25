@@ -3,5 +3,8 @@
 		{
 			"path": "."
 		}
-	]
+	],
+	"settings": {
+		"python.pythonPath": "D:\\Users\\francisco\\Anaconda3\\python.exe"
+	}
 }

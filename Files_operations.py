@@ -1,7 +1,7 @@
 from LatticeMech2 import *
 import xml.etree.ElementTree as ET
 import wx
-from lattice_objects import *
+from latticeObjects import *
 import copy
 
 class Files_system():
