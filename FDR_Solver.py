@@ -1,7 +1,7 @@
 # FDR_Solver
 # 2020/06/23 :
 #   - passage en homogénéisation énergétique
-#   - modification des tenseurs avec un format de calcul de Voigt
+#   - modification des tenseurs avec un format de calcul de Voigt et de notation tensorielle
 
 import numpy as np
 import copy
@@ -48,13 +48,27 @@ class solverFDR(object):
         # Stiffness tensor : [sigma]=[Mat][strain]
         self.GenerateEnergy(EL2)
         self.CalculateStiffnessW()
-        [self.Mat, self.MatVo, self.detg]=self.CalculateStiffnessW()
-        [self.MS, self.MSVo, self.MSTe]=self.CalculateCompliance()
+        [self.MatVo, self.MatTe, self.detg]=self.CalculateStiffnessW()
+        self.MSTe=self.CalculateComplianceW()
+        print("Compliance Tensor (in tensorial notation):")
+        print("[{:>10e} {:>10e} {:>10e} ]".format(self.MSTe[0,0],self.MSTe[0,1],self.MSTe[0,2]))
+        print("[{:>10e} {:>10e} {:>10e} ]".format(self.MSTe[1,0],self.MSTe[1,1],self.MSTe[1,2]))
+        print("[{:>10e} {:>10e} {:>10e} ]".format(self.MSTe[2,0],self.MSTe[2,1],self.MSTe[2,2]))
         self.CalculateModulus(EL2)
         [rho, K, Ex, Ey, nuyx, nuxy, muxy, etaxxy, etayxy,\
             etaxyx, etaxyy ]=self.CalculateModulus(EL2)
         print("rho={}\nK={}\nEx={}\nEy={}\nnuyx={}\nnuxy={}\nmuxy={}\netaxxy={}\netayxy={}\netaxyx={}\netaxyy={}\n".format(rho,K, Ex, Ey, nuyx,\
             nuxy, muxy, etaxxy, etayxy, etaxyx, etaxyy))
+
+    def CalculateComplianceW(self):
+        try:
+            MSTe=np.linalg.inv(self.MatTe)
+        except:
+            print("error : unable to calculate compliance matrix")
+            return -1
+        # MSTe : compliance matrix in basis tensor notation
+
+        return MSTe
 
     def CalculateStiffnessW(self):
         ''' Calculate the stiffness tensor'''
@@ -68,9 +82,26 @@ class solverFDR(object):
         for i in range(self.nbeams):
             Mat[:,:]=Mat[:,:]+self.W[i,:,:]
         Mat=1/detg*Mat
-        return Mat
+        # the raw matrix obtained here is for strain vector (dUx/dx, dUy/dy, dUx/dy)
+        # we need to fit it to strain vector (dUx/dx, dUy/dy, 2*dUx/dy) in Voigt notation
+        MatVo=np.ndarray((3,3),dtype=np.float32)
+        MatVo[:,:]=Mat[:,:]
+        MatVo[2,2]=MatVo[2,2]/4
+        MatVo[0,2]=MatVo[0,2]/2
+        MatVo[1,2]=MatVo[1,2]/2
+        MatVo[2,0]=MatVo[2,0]/2
+        MatVo[2,1]=MatVo[2,1]/2
+        # refit to strain vector (dUx/dx, dUy/dy, sqrt(2)*dUx/dy) in tensorial notation
+        MatTe=np.ndarray((3,3),dtype=np.float32)
+        MatTe[:,:]=Mat[:,:]
+        MatTe[2,2]=MatTe[2,2]/2
+        MatTe[0,2]=MatTe[0,2]/np.sqrt(2)
+        MatTe[1,2]=MatTe[1,2]/np.sqrt(2)
+        MatTe[2,0]=MatTe[2,0]/np.sqrt(2)   
+        MatTe[2,1]=MatTe[2,1]/np.sqrt(2)  
+        
+        return MatVo, MatTe, detg
 
-    
     def GenerateEnergy(self,EL2):
         '''Calculus of nodes's energy'''
         n=self.nnodes
@@ -95,7 +126,6 @@ class solverFDR(object):
 
             index_beam+=1
 
-
     def CalculateModulus(self,EL2):
         rho=0
         for i in EL2.beams:
@@ -111,69 +141,8 @@ class solverFDR(object):
         etaxyx=self.MSTe[2,0]*Ex
         etaxyy=self.MSTe[2,1]*Ey
         
-        return [rho, K, Ex, Ey, nuyx, nuxy, muxy,\
-             etaxxy, etayxy, etaxyx, etaxyy ]
+        return [rho, K, Ex, Ey, nuyx, nuxy, muxy,etaxxy, etayxy, etaxyx, etaxyy ]
 
-    def CalculateCompliance(self):
-        try:
-            MS=np.linalg.inv(self.Mat)
-        except:
-            print("error : unable to calculate compliance matrix")
-            return -1
-        # MS : compliance matrix in natural notations
-        # MSVo : compliance matrix in Voigt notations
-        # MSTe : compliance matrix in basis tensor notation
-        MSVo=np.zeros((3,3))
-        MSVo[0:2,0:2]=copy.deepcopy(MS[0:2,0:2])
-        MSVo[0,2]=MS[0,2]+MS[0,3]
-        MSVo[1,2]=MS[1,2]+MS[1,3]
-        MSVo[2,0]=MS[2,0]+MS[3,0]
-        MSVo[2,1]=MS[2,1]+MS[3,1]
-        MSVo[2,2]=MS[2,2]+MS[3,2]+MS[2,3]+MS[3,3]
-        MSTe=copy.deepcopy(MSVo)
-        MSTe[0,2]=MSTe[0,2]/np.sqrt(2)
-        MSTe[1,2]=MSTe[1,2]/np.sqrt(2)
-        MSTe[2,0]=MSTe[2,0]/np.sqrt(2)
-        MSTe[2,1]=MSTe[2,1]/np.sqrt(2)
-        MSTe[2,2]=MSTe[2,2]/2
-        return [MS, MSVo, MSTe]
-
-    # def CalculateStiffness(self):
-    #     g=np.append(self.P1,self.P2).reshape((2,2))
-    #     try:
-    #         detg=np.linalg.det(g)
-    #     except:
-    #         print("error detg")
-    #         return -1
-    #     Mat=1/detg*(np.outer(self.P1,self.S1).reshape((4,4))+np.outer(self.P2,self.S2).reshape((4,4)))
-    #     # rearrange (dUx/dx, dUy/dy, dUx/dy, dUy/dx)
-    #     L=copy.deepcopy(Mat[3,:]); 
-    #     Mat[3,:]=Mat[1,:]; 
-    #     Mat[1,:]=L
-    #     C=copy.deepcopy(Mat[:,3]); 
-    #     Mat[:,3]=Mat[:,2]; 
-    #     Mat[:,2]=Mat[:,1]; 
-    #     Mat[:,1]=C
-    #     # Mat : Stiffness matrix in natural notation
-    #     # MatVo : Stiffness Matrix in Voigt notation
-    #     MatVo=np.zeros((3,3))
-    #     MatVo[0:3,0:2]=Mat[0:3,0:2]
-    #     MatVo[0,2]=(Mat[0,2]+Mat[0,3])/2
-    #     MatVo[1,2]=(Mat[1,2]+Mat[1,3])/2
-    #     MatVo[2,2]=(Mat[2,2]+Mat[2,3])/2
-    #     return [Mat,MatVo,detg]
-
-    def CalculateSumForces(self,EL2):
-        S1=np.zeros((2,4))
-        S2=np.zeros((2,4))
-        index=0
-        for i in EL2.beams:
-            if (i.delta_1!=0) or (i.delta_2!=0):
-                S1=S1+i.delta_1*(self.N[index]*self.e[index].reshape((2,1))+self.T[index]*self.eT[index].reshape((2,1)))
-                S2=S2+i.delta_2*(self.N[index]*self.e[index].reshape((2,1))+self.T[index]*self.eT[index].reshape((2,1)))
-            index+=1
-        return [S1, S2]
-    
     def CalculateForces(self):
         N=self.N_vs[:,0:3*self.nnodes].dot(self.X)+self.N_vs[:,3*self.nnodes:3*self.nnodes+3]
         T=self.T_vs[:,0:3*self.nnodes].dot(self.X)+self.T_vs[:,3*self.nnodes:3*self.nnodes+3]
@@ -187,14 +156,9 @@ class solverFDR(object):
             print("matrix error ")
             return -1
         self.X[2:3*self.nnodes,:]=K_i.dot(self.B[2:3*self.nnodes,:])
-        # omega_rigid=np.array([1/2,-1/2])
-        # for i in range(2,3*self.nnodes,3):
-        #     self.X[i,1:3]=self.X[i,1:3]+omega_rigid
-        # pass
 
     def DotProductV(self,v: np.array,dUn: np.array):
         return v[0]*dUn[0]+v[1]*dUn[1]
-
 
     def GenerateForcesKB(self,EL2):
         index_beam=0
@@ -207,7 +171,6 @@ class solverFDR(object):
             n=self.nnodes
             self.N_vs[index_beam,3*index_n2:3*index_n2+2]=kae
             self.N_vs[index_beam,3*index_n1:3*index_n1+2]=self.N_vs[index_beam,3*index_n1:3*index_n1+2]-kae
-
             self.N_vs[index_beam,3*n:3*n+3]=deplN
                                                 
             # transverses forces
@@ -218,7 +181,6 @@ class solverFDR(object):
             kbL=-i.kb*i.length/2
             self.T_vs[index_beam,3*index_n1+2]=kbL
             self.T_vs[index_beam,3*index_n2+2]=self.T_vs[index_beam,3*index_n2+2]+kbL
-
             self.T_vs[index_beam,3*n:3*n+3]=deplT
                                                 
             # moments
@@ -226,7 +188,6 @@ class solverFDR(object):
             self.M_ves[index_beam,3*index_n2:3*index_n2+2]=kbe2
             self.M_ves[index_beam,3*index_n1:3*index_n1+2]=\
                 self.M_ves[index_beam,3*index_n1:3*index_n1+2]-kbe2
-
             kbL2=i.kb*i.length*i.length/6
             self.M_ves[index_beam,3*index_n1+2]=kbL2
             self.M_ves[index_beam,3*index_n2+2]=\
@@ -264,7 +225,6 @@ class solverFDR(object):
             index_beam+=1
         pass
 
-    # def GenerateDirectors(self, e: np.array, eT: np.array,EL2: elements):
     def GenerateDirectors(self, e: np.array, eT: np.array,EL2):
         ''' generate array for directors '''
         number_seq=0
@@ -273,7 +233,6 @@ class solverFDR(object):
             eT[number_seq,:]=np.array([-i.e_y,i.e_x])
             number_seq=number_seq+1
 
-    # def GenerateDu(self,EL2: elements):
     def GeneratedU(self,EL2):
         ''' Generate [dU1,dU2]
         for non orthonormal grid for lattice
