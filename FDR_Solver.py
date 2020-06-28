@@ -38,14 +38,27 @@ class solverFDR(object):
         self.M_ves=np.zeros((3*self.nnodes+3)*self.nbeams,dtype=np.float32).reshape((self.nbeams),3*self.nnodes+3)
         self.M_vos=np.zeros((3*self.nnodes+3)*self.nbeams,dtype=np.float32).reshape((self.nbeams),3*self.nnodes+3)
         self.W=np.zeros(self.nbeams*9,dtype=np.float32).reshape((self.nbeams,3,3))
-        # Calculus
+        self.ka=np.zeros(self.nbeams,dtype=np.float32)
+        self.kb=np.zeros(self.nbeams,dtype=np.float32)
+        self.V=np.zeros(self.nbeams,dtype=np.float32)
+        self.t=np.zeros(self.nbeams,dtype=np.float32)
+        self.knbi=np.zeros((self.nbeams,3,3),dtype=np.float32); # kn individuel par poutre
+        self.ktbi=np.zeros((self.nbeams,3,3),dtype=np.float32); # kt individuel par poutre
+        self.kn=np.zeros((6,self.nbeams),dtype=np.float32)
+        self.kt=np.zeros((6,self.nbeams),dtype=np.float32)
+        
+        self.InitialCall(EL2)
+
+    def InitialCall(self,EL2):
+        # Initialise
+        self.GeneratekakbV(EL2)
         self.GenerateDirectors(self.e,self.eT,EL2)
         self.dU=self.GeneratedU(EL2)
         self.GenerateForcesKB(EL2)
+        # Solve
         self.SolveX()
+        # Results
         [self.N, self.T]=self.CalculateForces()
-        #
-        # Stiffness tensor : [sigma]=[Mat][strain]
         self.GenerateEnergy(EL2)
         self.CalculateStiffnessW()
         [self.MatVo, self.MatTe, self.detg]=self.CalculateStiffnessW()
@@ -59,6 +72,37 @@ class solverFDR(object):
             etaxyx, etaxyy ]=self.CalculateModulus(EL2)
         print("rho={}\nK={}\nEx={}\nEy={}\nnuyx={}\nnuxy={}\nmuxy={}\netaxxy={}\netayxy={}\netaxyx={}\netaxyy={}\n".format(rho,K, Ex, Ey, nuyx,\
             nuxy, muxy, etaxxy, etayxy, etaxyx, etaxyy))
+        # extraction kn and kt for optimization
+        self.Generateknkt()
+
+    def Generateknkt(self):
+        for i in range(self.nbeams):
+            self.kn[0,i]=self.knbi[i,0,0]
+            self.kn[1,i]=self.knbi[i,1,1]
+            self.kn[2,i]=self.knbi[i,2,2]
+            self.kn[3,i]=self.knbi[i,0,1]
+            self.kn[4,i]=self.knbi[i,0,2]
+            self.kn[5,i]=self.knbi[i,1,2]
+
+            self.kt[0,i]=self.ktbi[i,0,0]
+            self.kt[1,i]=self.ktbi[i,1,1]
+            self.kt[2,i]=self.ktbi[i,2,2]
+            self.kt[3,i]=self.ktbi[i,0,1]
+            self.kt[4,i]=self.ktbi[i,0,2]
+            self.kt[5,i]=self.ktbi[i,1,2]
+
+    def GeneratekakbV(self,EL2):
+        index_b=0
+        for i in EL2.beams:
+            p=EL2.index_profile(i.profile)[0]
+            t=p.width
+            E=p.E
+            L=i.length
+            self.ka[index_b]=E*t/L
+            self.kb[index_b]=E*(t/L)**3
+            self.V[index_b]=t*L
+            self.t[index_b]=t
+            index_b+=1
 
     def CalculateComplianceW(self):
         try:
@@ -82,6 +126,10 @@ class solverFDR(object):
         for i in range(self.nbeams):
             Mat[:,:]=Mat[:,:]+self.W[i,:,:]
         Mat=1/detg*Mat
+
+        self.knbi=1/detg*self.knbi
+        self.ktbi=1/detg*self.ktbi
+
         # the raw matrix obtained here is for strain vector (dUx/dx, dUy/dy, dUx/dy)
         # we need to fit it to strain vector (dUx/dx, dUy/dy, 2*dUx/dy) in Voigt notation
         MatVo=np.ndarray((3,3),dtype=np.float32)
@@ -99,6 +147,20 @@ class solverFDR(object):
         MatTe[1,2]=MatTe[1,2]/np.sqrt(2)
         MatTe[2,0]=MatTe[2,0]/np.sqrt(2)   
         MatTe[2,1]=MatTe[2,1]/np.sqrt(2)  
+
+        # same refit for individual components of knbi and ktbi
+        for i in range(self.nbeams):
+            self.knbi[i,2,2]=self.knbi[i,2,2]/2
+            self.knbi[i,0,2]=self.knbi[i,0,2]/np.sqrt(2)
+            self.knbi[i,1,2]=self.knbi[i,1,2]/np.sqrt(2)
+            self.knbi[i,2,0]=self.knbi[i,2,0]/np.sqrt(2)   
+            self.knbi[i,2,1]=self.knbi[i,2,1]/np.sqrt(2)  
+
+            self.ktbi[i,2,2]=self.ktbi[i,2,2]/2
+            self.ktbi[i,0,2]=self.ktbi[i,0,2]/np.sqrt(2)
+            self.ktbi[i,1,2]=self.ktbi[i,1,2]/np.sqrt(2)
+            self.ktbi[i,2,0]=self.ktbi[i,2,0]/np.sqrt(2)   
+            self.ktbi[i,2,1]=self.ktbi[i,2,1]/np.sqrt(2) 
         
         return MatVo, MatTe, detg
 
@@ -120,17 +182,19 @@ class solverFDR(object):
             deplTE=self.DotProductV(self.eT[index_beam,:],deplEv)
             deplTO=self.DotProductV(self.eT[index_beam,:],deplOv)
 
-            self.W[index_beam,:,:]=np.outer(self.N[index_beam,:],deplNE)-\
-                np.outer(self.N[index_beam,:],deplNO)+np.outer(self.T[index_beam,:],deplTE)\
-                    -np.outer(self.T[index_beam,:],deplTO)
+            energyN=np.outer(self.N[index_beam,:],deplNE)-np.outer(self.N[index_beam,:],deplNO)
+            energyT=np.outer(self.T[index_beam,:],deplTE)-np.outer(self.T[index_beam,:],deplTO)
+            self.W[index_beam,:,:]=energyN+energyT
 
+            self.knbi[index_beam,:,:]=energyN/self.t[index_beam]
+            self.ktbi[index_beam,:,:]=energyT/(self.t[index_beam])**3
             index_beam+=1
 
     def CalculateModulus(self,EL2):
         rho=0
-        for i in EL2.beams:
-            V=i.volume
-            rho=rho+V
+        for i in range(self.nbeams):
+            vol=self.V[i]
+            rho=rho+vol
         rho=rho/self.detg
         K=1/(self.MSTe[0,0]+self.MSTe[0,1]+self.MSTe[1,0]+self.MSTe[1,1]) 
         Ex=1/self.MSTe[0,0]; Ey=1/self.MSTe[1,1]
@@ -166,7 +230,7 @@ class solverFDR(object):
             index_n1=EL2.IndexNode(i.node_1)[1]
             index_n2=EL2.IndexNode(i.node_2)[1]
             # normal forces
-            kae=i.ka*self.e[index_beam,:]
+            kae=self.ka[index_beam]*self.e[index_beam,:]
             deplN=self.DotProductV(i.delta_1*kae,self.dU[0])+self.DotProductV(i.delta_2*kae,self.dU[1])
             n=self.nnodes
             self.N_vs[index_beam,3*index_n2:3*index_n2+2]=kae
@@ -174,7 +238,7 @@ class solverFDR(object):
             self.N_vs[index_beam,3*n:3*n+3]=deplN
                                                 
             # transverses forces
-            kbe=i.kb*self.eT[index_beam,:]
+            kbe=self.kb[index_beam]*self.eT[index_beam,:]
             deplT=self.DotProductV(i.delta_1*kbe,self.dU[0])+self.DotProductV(i.delta_2*kbe,self.dU[1])
             self.T_vs[index_beam,3*index_n2:3*index_n2+2]=kbe
             self.T_vs[index_beam,3*index_n1:3*index_n1+2]=self.T_vs[index_beam,3*index_n1:3*index_n1+2]-kbe
@@ -184,11 +248,11 @@ class solverFDR(object):
             self.T_vs[index_beam,3*n:3*n+3]=deplT
                                                 
             # moments
-            kbe2=-i.kb*self.eT[index_beam,:]*i.length/2
+            kbe2=-self.kb[index_beam]*self.eT[index_beam,:]*i.length/2
             self.M_ves[index_beam,3*index_n2:3*index_n2+2]=kbe2
             self.M_ves[index_beam,3*index_n1:3*index_n1+2]=\
                 self.M_ves[index_beam,3*index_n1:3*index_n1+2]-kbe2
-            kbL2=i.kb*i.length*i.length/6
+            kbL2=self.kb[index_beam]*i.length*i.length/6
             self.M_ves[index_beam,3*index_n1+2]=kbL2
             self.M_ves[index_beam,3*index_n2+2]=\
                 self.M_ves[index_beam,3*index_n2+2]+2*kbL2

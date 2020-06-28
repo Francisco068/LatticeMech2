@@ -28,6 +28,9 @@
 #include <wx/choice.h>
 #include <wx/toolbar.h>
 #include <wx/frame.h>
+#include <wx/stattext.h>
+#include <wx/button.h>
+#include <wx/dialog.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -80,6 +83,26 @@ class MyFrame1 : public wxFrame
 			m_splitter5->SetSashPosition( 0 );
 			m_splitter5->Disconnect( wxEVT_IDLE, wxIdleEventHandler( MyFrame1::m_splitter5OnIdle ), NULL, this );
 		}
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class target_dialog
+///////////////////////////////////////////////////////////////////////////////
+class target_dialog : public wxDialog
+{
+	private:
+
+	protected:
+		wxStaticText* m_staticText2;
+		wxTextCtrl* m_textCtrl2;
+		wxButton* OkButton;
+		wxButton* CancelButton;
+
+	public:
+
+		target_dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 241,123 ), long style = wxDEFAULT_DIALOG_STYLE );
+		~target_dialog();
 
 };
 

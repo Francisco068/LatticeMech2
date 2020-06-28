@@ -68,12 +68,24 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_menuItem10 = new wxMenuItem( m_menu6, wxID_ANY, wxString( wxT("Add Beam") ) , wxEmptyString, wxITEM_NORMAL );
 	m_menu6->Append( m_menuItem10 );
 
+	wxMenuItem* m_menuItem14;
+	m_menuItem14 = new wxMenuItem( m_menu6, wxID_ANY, wxString( wxT("Add E target") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu6->Append( m_menuItem14 );
+
+	wxMenuItem* m_menuItem15;
+	m_menuItem15 = new wxMenuItem( m_menu6, wxID_ANY, wxString( wxT("Add Profile") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu6->Append( m_menuItem15 );
+
 	m_menubar1->Append( m_menu6, wxT("Tools") );
 
 	m_menu61 = new wxMenu();
 	wxMenuItem* m_menuItem12;
-	m_menuItem12 = new wxMenuItem( m_menu61, wxID_ANY, wxString( wxT("Go") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuItem12 = new wxMenuItem( m_menu61, wxID_ANY, wxString( wxT("Homogenization") ) , wxEmptyString, wxITEM_NORMAL );
 	m_menu61->Append( m_menuItem12 );
+
+	wxMenuItem* InvHomogenize;
+	InvHomogenize = new wxMenuItem( m_menu61, wxID_ANY, wxString( wxT("Inverse Homogenization") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu61->Append( InvHomogenize );
 
 	m_menubar1->Append( m_menu61, wxT("Calculations") );
 
@@ -181,5 +193,45 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 }
 
 MyFrame1::~MyFrame1()
+{
+}
+
+target_dialog::target_dialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	wxBoxSizer* bSizer7;
+	bSizer7 = new wxBoxSizer( wxVERTICAL );
+
+	m_staticText2 = new wxStaticText( this, wxID_ANY, wxT("E Target number :"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText2->Wrap( -1 );
+	bSizer7->Add( m_staticText2, 0, wxALL, 5 );
+
+	m_textCtrl2 = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer7->Add( m_textCtrl2, 0, wxALL, 5 );
+
+	wxBoxSizer* bSizer8;
+	bSizer8 = new wxBoxSizer( wxHORIZONTAL );
+
+
+	bSizer8->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	OkButton = new wxButton( this, wxID_ANY, wxT("Ok"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer8->Add( OkButton, 0, wxALL, 5 );
+
+	CancelButton = new wxButton( this, wxID_ANY, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer8->Add( CancelButton, 0, wxALL, 5 );
+
+
+	bSizer7->Add( bSizer8, 1, wxEXPAND, 5 );
+
+
+	this->SetSizer( bSizer7 );
+	this->Layout();
+
+	this->Centre( wxBOTH );
+}
+
+target_dialog::~target_dialog()
 {
 }

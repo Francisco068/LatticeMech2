@@ -136,7 +136,7 @@ class Files_system():
         str_tb="\"tb\": ["
         for i in parent.EL.beams:
             str_Lb=str_Lb+str(i.length)+','
-            prof=parent.EL.index_profile(i.profile)[0]
+            prof=parent.EL.IndexObject(i.profile,parent.EL.profiles)[0]
             str_tb=str_tb+str(prof.width)+','
         str_Lb=str_Lb[0:len(str_Lb)-1]+"],\n"
         str_tb=str_tb[0:len(str_tb)-1]+"],\n"
@@ -223,7 +223,7 @@ class Files_system():
         str_Vb="Vb:=["
         for i in parent.EL.beams:
             str_Lb=str_Lb+"%10e" % i.length+','
-            prof=parent.EL.index_profile(i.profile)[0]
+            prof=parent.EL.IndexObject(i.profile,parent.EL.profiles)[0]
             str_tb=str_tb+"%10e" % prof.width+','
             str_Vb=str_Vb+"%10e" % (i.length*prof.width)+','
         str_Lb=str_Lb[0:len(str_Lb)-1]+"];\n"

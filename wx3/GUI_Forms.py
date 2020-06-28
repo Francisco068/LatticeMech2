@@ -66,11 +66,20 @@ class MyFrame1 ( wx.Frame ):
 		self.m_menuItem10 = wx.MenuItem( self.m_menu6, wx.ID_ANY, u"Add Beam", wx.EmptyString, wx.ITEM_NORMAL )
 		self.m_menu6.Append( self.m_menuItem10 )
 
+		self.m_menuItem14 = wx.MenuItem( self.m_menu6, wx.ID_ANY, u"Add E target", wx.EmptyString, wx.ITEM_NORMAL )
+		self.m_menu6.Append( self.m_menuItem14 )
+
+		self.m_menuItem15 = wx.MenuItem( self.m_menu6, wx.ID_ANY, u"Add Profile", wx.EmptyString, wx.ITEM_NORMAL )
+		self.m_menu6.Append( self.m_menuItem15 )
+
 		self.m_menubar1.Append( self.m_menu6, u"Tools" )
 
 		self.m_menu61 = wx.Menu()
-		self.m_menuItem12 = wx.MenuItem( self.m_menu61, wx.ID_ANY, u"Go", wx.EmptyString, wx.ITEM_NORMAL )
+		self.m_menuItem12 = wx.MenuItem( self.m_menu61, wx.ID_ANY, u"Homogenization", wx.EmptyString, wx.ITEM_NORMAL )
 		self.m_menu61.Append( self.m_menuItem12 )
+
+		self.InvHomogenize = wx.MenuItem( self.m_menu61, wx.ID_ANY, u"Inverse Homogenization", wx.EmptyString, wx.ITEM_NORMAL )
+		self.m_menu61.Append( self.InvHomogenize )
 
 		self.m_menubar1.Append( self.m_menu61, u"Calculations" )
 
@@ -181,5 +190,50 @@ class MyFrame1 ( wx.Frame ):
 	def m_splitter5OnIdle( self, event ):
 		self.m_splitter5.SetSashPosition( 0 )
 		self.m_splitter5.Unbind( wx.EVT_IDLE )
+
+
+###########################################################################
+## Class target_dialog
+###########################################################################
+
+class target_dialog ( wx.Dialog ):
+
+	def __init__( self, parent ):
+		wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 241,123 ), style = wx.DEFAULT_DIALOG_STYLE )
+
+		self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
+
+		bSizer7 = wx.BoxSizer( wx.VERTICAL )
+
+		self.m_staticText2 = wx.StaticText( self, wx.ID_ANY, u"E Target number :", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText2.Wrap( -1 )
+
+		bSizer7.Add( self.m_staticText2, 0, wx.ALL, 5 )
+
+		self.m_textCtrl2 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		bSizer7.Add( self.m_textCtrl2, 0, wx.ALL, 5 )
+
+		bSizer8 = wx.BoxSizer( wx.HORIZONTAL )
+
+
+		bSizer8.Add( ( 0, 0), 1, wx.EXPAND, 5 )
+
+		self.OkButton = wx.Button( self, wx.ID_ANY, u"Ok", wx.DefaultPosition, wx.DefaultSize, 0 )
+		bSizer8.Add( self.OkButton, 0, wx.ALL, 5 )
+
+		self.CancelButton = wx.Button( self, wx.ID_ANY, u"Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
+		bSizer8.Add( self.CancelButton, 0, wx.ALL, 5 )
+
+
+		bSizer7.Add( bSizer8, 1, wx.EXPAND, 5 )
+
+
+		self.SetSizer( bSizer7 )
+		self.Layout()
+
+		self.Centre( wx.BOTH )
+
+	def __del__( self ):
+		pass
 
 

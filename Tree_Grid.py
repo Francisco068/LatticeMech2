@@ -2,8 +2,7 @@ import wx
 from wx3.GUI_Forms import *
 from LatticeMech2 import *
 from latticeObjects import *
-
-class Tree_Grid_operations():
+class TreeGridOperations():
     # def __init__(self,tree: wx.TreeCtrl,grid: wx.grid.Grid,EL: elements):
     def __init__(self,tree: wx.TreeCtrl,grid: wx.grid.Grid,EL):
         self.tree=tree
@@ -93,7 +92,6 @@ class Tree_Grid_operations():
         except :
             return -1
         
-
         if (str_4[0]=="Profile"):
             self.Set_grid_perso(["E","nu","section","width"],str_3[0],str_5)
             self.EL.active_profile=int(str_4[1])
@@ -106,6 +104,9 @@ class Tree_Grid_operations():
         
         if (str_4[0].strip()=="beam"):
             self.Set_grid_perso(["node 1","node 2","delta 1","delta 2","profile"],str_3[0],str_5)
+
+        if (str_4[0].strip()=="ETarget"):
+            self.Set_grid_perso(["Ex","nuyx","Ey","Gxy","etaxxy","etayxy"],str_3[0],str_5)
 
     def Set_grid_perso(self,labels_col,labels_row,cells):
         """Set_grid_perso(self,col,row,labels_col,labels_row,cells)"""
@@ -142,6 +143,27 @@ class Tree_Grid_operations():
         str_tree="beam.%i:%i,%i,%i,%i,%i" % (beam.number,beam.node_1\
             ,beam.node_2,beam.delta_1,beam.delta_2,beam.profile)
         self.tree.AppendItem(resultat[1],str_tree)
+
+    def Add_tree_profile(self,profile):
+        resultat=self.Search_branch_tree_ctrl_perso("Profiles")
+        if (resultat[0]==-1):
+            self.Message("Error: No branch of profile inputs\n")
+            return
+            
+        str_tree="Profile.%i:%g,%g,%s,%g" % (profile.number,profile.E\
+            ,profile.nu,profile.section,profile.width)
+        self.tree.AppendItem(resultat[1],str_tree)
+
+    def Add_tree_ETarget(self,ETarget):
+        resultat=self.Search_branch_tree_ctrl_perso("E_Targets")
+        if (resultat[0]==-1):
+            self.Message("Error: No branch of E targets inputs\n")
+            return
+            
+        str_tree="ETarget.%i:%g,%g,%g,%g,%g,%g" % (ETarget.number,ETarget.Ex\
+            ,ETarget.nuyx,ETarget.Ey,ETarget.Gxy, ETarget.etaxxy,\
+            ETarget.etayxy)
+        self.tree.AppendItem(resultat[1],str_tree)
     
     def Remove_tree_node(self,numero: int):
         Item1=self.Search_item_tree_ctrl_perso("Nodes",numero)
@@ -150,7 +172,6 @@ class Tree_Grid_operations():
         else:
             self.Message("Error : Point not found in the tree\n")
 
-    
     def Remove_tree_beam(self,numero: int):
         Item1=self.Search_item_tree_ctrl_perso("Beams",numero)
         if Item1[0]==1:
@@ -168,32 +189,36 @@ class Tree_Grid_operations():
         item1=self.tree.GetRootItem()
 
         item2=self.tree.GetFirstChild(item1)
+        # get element level 1
         f1=item2[0].IsOk()
         if f1==False:
+            # Lattice void
             return -1
         while  (f1):
             item3=self.tree.GetFirstChild(item2[0])
+            # get element level 2
             f2=item3[0].IsOk()
-            if f2==False:
-                break
-            while (f2):
-                str1=self.tree.GetItemText(item3[0])
-                str2=str1.split(':')
-                if str2[0]==item:
-                    self.tree.SetItemText(item3[0],str)
-                    f2=0
-                    return 0
-                item3=self.tree.GetNextChild(item3[0],item3[1])
-                f2=item3[0].IsOk()
-                if f2==False:
-                    break 
+            if f2==True:
+                while (f2):
+                    str1=self.tree.GetItemText(item3[0])
+                    # get str element level 2
+                    str2=str1.split(':')
+                    if str2[0]==item:
+                        self.tree.SetItemText(item3[0],str)
+                        f2=0
+                        return 0
+                    item3=self.tree.GetNextChild(item3[0],item3[1])
+                    # next element level 2
+                    f2=item3[0].IsOk()
+                    if f2==False:
+                        break 
             item2=self.tree.GetNextChild(item2[0],item2[1])
+            # next element level 1
             f1=item2[0].IsOk()
             if f1==False:
                 return -1    
         return -1
         
-    
     def Modify_TG_from_cell(self, panel: wx.Panel):
         
         RowLabel=self.grid.GetRowLabelValue(0)
@@ -210,98 +235,24 @@ class Tree_Grid_operations():
         return str1
 
         pass
-
-        # if (name[0]=="Profile"):
-        #     str3="Material"
-        #     val1=self.grid_1.GetCellValue(0,0)
-        #     str_tree="modulus(GPa):"+str(val1)
-        #     resultat=self.Search_branch_tree_ctrl_perso(str3)
-        #     if resultat[0]==1:
-        #         self.tree_ctrl_1.SetItemText(resultat[2],str_tree)
-        #     else:
-        #         self.Message_dialog("None entry found in tree ctrl",wx.ICON_ERROR)
-
-        # if str2[0]=="N":
-        #     str3="Nodes"
-        #     val1=self.grid_1.GetCellValue(0,0)
-        #     val2=self.grid_1.GetCellValue(0,1)
-        #     str_tree='N'+'.'+str(numero)+':'+'('+val1+','+val2+')'
-        #     f=0
-        #     for i in self.EL.nodes:
-        #         if i.number==numero :
-        #             i.x=float(val1)
-        #             i.y=float(val2)
-        #             f=1
-        #             break
-        #     if f==0 :
-        #         print("node not found")
-        # if str2[0]=="Y":
-        #     str3="Basis"
-        #     val1=self.grid_1.GetCellValue(0,0)
-        #     val2=self.grid_1.GetCellValue(0,1)
-        #     str_tree='Y'+'.'+str(numero)+':'+'('+val1+','+val2+')'
-        #     f=0
-        #     for i in self.EL.periods:
-        #         if i.number==numero :
-        #             vect=np.array([float(val1),float(val2)])
-        #             i.length=np.linalg.norm(vect)
-        #             vect2=normalize_vector(vect)
-        #             i.x=vect2[0]
-        #             i.y=vect2[1]
-        #             f=1
-        #             break
-        #     if f==0 :
-        #         print("period vector not found")
-
-        # if str2[0]=="beam":
-        #     str3="Beams"
-        #     val1=self.grid_1.GetCellValue(0,0)
-        #     val2=self.grid_1.GetCellValue(0,1)
-        #     val3=self.grid_1.GetCellValue(0,2)
-        #     val4=self.grid_1.GetCellValue(0,3)
-        #     val5=self.grid_1.GetCellValue(0,4)
-        #     val6=self.grid_1.GetCellValue(0,5)
-        #     str_tree='beam'+'.'+str(numero)+':'+'('+val1+','+val2+')'+',('+val3+','+val4+')'+','+val5+','+val6
-        #     f=0
-        #     for i in self.EL.beams:
-        #         if i.number==numero :
-        #             i.node_1=int(val1)
-        #             i.node_2=int(val2)
-        #             i.delta_1=int(val3)
-        #             i.delta_2=int(val4)
-        #             i.section=val5
-        #             i.width=float(val6)
-        #             i.evaluate_k(self.EL)
-        #             f=1
-        #             break
-        #     if f==0 :
-        #         print("period vector not found")
-
-        # resultat=self.Search_item_tree_ctrl_perso(str3,numero)
-        # if resultat[0]==1:
-        #     self.tree_ctrl_1.SetItemText(resultat[1],str_tree)
-        # else:
-        #     self.Message_dialog("None entry found in tree ctrl",wx.ICON_ERROR)
-            
-
-
-    
-    def Grid_init(self):
+     
+    def GridInit(self):
         str1=["X","Y"]
         str2="Y.1"
         str3=["1","0"]
         self.Set_grid_perso(str1,str2,str3)
 
-
-    def TreeCtrl_init(self):
+    def TreeCtrlInit(self):
         """Initialise Tree Ctrl"""
-        Tree_Lattice_Id=self.tree.AddRoot("Lattice")
-        ProfilId=self.tree.AppendItem(Tree_Lattice_Id,"Profiles:")
-        BasisId=self.tree.AppendItem(Tree_Lattice_Id, "Basis:")
-        NodesId=self.tree.AppendItem(Tree_Lattice_Id, "Nodes:")
-        BeamsId=self.tree.AppendItem(Tree_Lattice_Id, "Beams:")
+        tree_Lattice_Id=self.tree.AddRoot("Lattice")
+        ProfilId=self.tree.AppendItem(tree_Lattice_Id,"Profiles:")
+        BasisId=self.tree.AppendItem(tree_Lattice_Id, "Basis:")
+        NodesId=self.tree.AppendItem(tree_Lattice_Id, "Nodes:")
+        BeamsId=self.tree.AppendItem(tree_Lattice_Id, "Beams:")
+        ETargetId=self.tree.AppendItem(tree_Lattice_Id,"E_Targets:")
         self.tree.AppendItem(BasisId, "Y.1:1,0")
         self.tree.AppendItem(BasisId, "Y.2:0,1")
         self.tree.AppendItem(NodesId, "N.1:0,0")
         self.tree.AppendItem(ProfilId, "Profile.1:210000,0.3,rect,0.3")
+        self.tree.AppendItem(ETargetId,"ETarget.1:21000,0.3,21000,7000,0,0")
         self.tree.ExpandAll()

@@ -20,6 +20,7 @@ class GUI3D(wx.App):
     def OnInit(self):
         self.GUI= MyFrame1(None)
         self.SetTopWindow(self.GUI)
+        self.DIAL=target_dialog(None) 
         # file attributes
         self.File_saved = False
         self.Filename_defined = False
@@ -28,6 +29,8 @@ class GUI3D(wx.App):
         self.Filename_txt =""
         # Initialise data elements
         self.EL=elements(self)
+        # dialogs variables
+        self.ETarget_number=1
 
         # Bind MenuBar event
         self.Bind(wx.EVT_MENU, self.File_open, id=self.GUI.m_menuItem1.GetId())
@@ -41,8 +44,13 @@ class GUI3D(wx.App):
         self.Bind(wx.EVT_MENU, self.Yield_limits, id=self.GUI.m_menuItem8.GetId())        
         self.Bind(wx.EVT_MENU, self.Add_point, id=self.GUI.m_menuItem9.GetId())
         self.Bind(wx.EVT_MENU, self.Add_beam, id=self.GUI.m_menuItem10.GetId())
+        self.Bind(wx.EVT_MENU, self.AddETarget, id=self.GUI.m_menuItem14.GetId())
+        self.Bind(wx.EVT_MENU, self.AddProfile, id=self.GUI.m_menuItem15.GetId())
+
         self.Bind(wx.EVT_MENU, self.Help, id=self.GUI.m_menuItem11.GetId())
         self.Bind(wx.EVT_MENU, self.Calculations_go, id=self.GUI.m_menuItem12.GetId())
+        self.Bind(wx.EVT_MENU, self.InverseHomogenization, id=self.GUI.InvHomogenize.GetId())
+
         # Bind Toolbar event
         self.Bind(wx.EVT_TOOL, self.Delete_item, self.GUI.m_tool1)
         self.Bind(wx.EVT_TOOL, self.Add_point, self.GUI.m_tool2)
@@ -55,6 +63,9 @@ class GUI3D(wx.App):
         self.Bind(wx.EVT_TREE_SEL_CHANGED,self.TreeCtrl_select,self.GUI.m_treeCtrl1)
         # Bind choice event
         self.Bind(wx.EVT_CHOICE, self.Choice_select, self.GUI.m_choice1)
+        # Bind dialog event
+        self.Bind(wx.EVT_BUTTON,self.DIALOK,self.DIAL.OkButton)
+        self.Bind(wx.EVT_BUTTON,self.DIALCANCEL,self.DIAL.CancelButton)
         # initialise Choice 2D / 3D
         self.GUI.m_choice1.Select(2)
         # initialise graphic canvas
@@ -67,15 +78,29 @@ class GUI3D(wx.App):
         # initialise File system
         self.fs=Files_system(self)
         # initialise TreeCtrl, Grid and elements
-        self.Tg=Tree_Grid_operations(self.GUI.m_treeCtrl1,self.GUI.m_grid1,self.EL)
-        self.Tg.Grid_init()
-        self.Tg.TreeCtrl_init()
+        self.Tg=TreeGridOperations(self.GUI.m_treeCtrl1,self.GUI.m_grid1,self.EL)
+        self.Tg.GridInit()
+        self.Tg.TreeCtrlInit()
         self.EL.Elements_init()
         # end of user added elements 
         self.GUI.Show()
         self.Canvas2D.Refresh()
         return True
-    
+
+    def InverseHomogenization(self,event):
+        self.DIAL.Show(True)
+        event.Skip()
+
+    def DIALOK(self,event):
+        self.ETarget_number=int(self.DIAL.m_textCtrl2.Value)
+        print("E Target number : {}".format(self.ETarget_number))
+        self.DIAL.Show(False)
+        event.Skip()
+
+    def DIALCANCEL(self, event):
+        self.DIAL.Show(False)
+        event.Skip()
+
     def TreeCtrl_select(self,event):
         
         item_1 = event.Item
@@ -224,6 +249,18 @@ class GUI3D(wx.App):
     def Add_beam(self, event): #from menu
         """menu Add beam"""  
         self.EL.Mode="ADD_BEAM_P1"
+        event.Skip()
+    
+    def AddETarget(self, event): #from menu
+        """menu Add ETarget"""  
+        ETarget1=self.EL.AddETarget()
+        self.Tg.Add_tree_ETarget(ETarget1)
+        event.Skip()
+
+    def AddProfile(self, event): #from menu
+        """menu Add Profile"""  
+        profile1=self.EL.AddProfile()
+        self.Tg.Add_tree_profile(profile1)
         event.Skip()
 
     def File_open(self, event): #from menu

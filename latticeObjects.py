@@ -11,7 +11,7 @@ from  Files_operations import *
 #" Profile.1:210,0.3,rect,0.1"
 class profile(object):
     """ Class for object :profile of the beams"""
-    def __init__(self,number,E,nu,section,width):
+    def __init__(self,number=1,E=210000,nu=0.3,section="rect",width=0.1):
         self.number=number
         self.E=E
         self.nu=nu
@@ -161,9 +161,6 @@ class beam(object):
     delta_2: delta 2 factor for Y2 translation vector added to node 2 coordinates
     e_x: value of x beam director
     e_y: value of y beam director
-    ka: value of beam axial stiffness
-    kb: value of beam bending stiffness
-    material_E: Young modulus(GPa) of beam's material
     number: beam identifier
     section: string identifier for beam section type
     focused: True if mouse motion upon beam if case of delete mode
@@ -180,11 +177,8 @@ class beam(object):
         self.delta_2=delta_2
         self.e_x=e_x
         self.e_y=e_y
-        self.ka=ka
-        self.kb=kb
         self.number=number
         self.profile=profile
-        self.volume=0
         self.focused=False
     
     def evaluate_k(self,parent):
@@ -272,6 +266,16 @@ class beam(object):
 
         dc.DrawBitmap(bitmap,(N1_S[0]+N2_S[0])/2+width/2+2,
                       (N1_S[1]+N2_S[1])/2+width/2+2,True)
+
+class ETarget(object):
+    def __init__(self,number=1,Ex=21000,nuyx=0.3,Ey=21000,Gxy=7000,etaxxy=0,etayxy=0):
+        self.number=number
+        self.Ex=Ex
+        self.nuyx=nuyx
+        self.Ey=Ey
+        self.Gxy=Gxy
+        self.etaxxy=etaxxy
+        self.etayxy=etayxy
     
 class elements(object):
     """"Arrays of basic elements of lattice 
@@ -294,6 +298,7 @@ class elements(object):
         self.beams=[]
         self.periods=[]
         self.profiles=[]
+        self.ETargets=[]
         self.EraseAll()
     
     def LenNodes(self):
@@ -307,6 +312,7 @@ class elements(object):
         self.beams=[]
         self.periods=[]
         self.profiles=[]
+        self.ETargets=[]
         self.Mode="ADD_POINT"
         self.P1_acquired=node(0,0,5,0)
         self.P1_acquired_bool=False
@@ -318,6 +324,7 @@ class elements(object):
         self.periods.append(periodicity(0,1,1,2))
         self.nodes.append(node(0,0,5,1))
         self.profiles.append(profile(1,210000,0.3,"rect",0.3))
+        self.ETargets.append(ETarget(1,21000,0.3,21000,7000,0,0))
 
     def Delete_all_items(self):
         self.EraseAll()
@@ -338,43 +345,19 @@ class elements(object):
 
         for i in self.periods:
             i.draw(dc,view)
-    
-    def IndexNode(self,nodenumber: int):
-        """return the node based on identifier value
+
+    def IndexObject(self,nodenumber: int,t_object):
+        """return the index based on identifier value
         
         node: identifier value
         """
         index=0
-        for i in self.nodes:
+        for i in t_object:
             if i.number==nodenumber:
                 return i,index
                 break
             index+=1
 
-    def index_profile(self,profilenumber: int):
-        """return the profile based on identifier value
-        
-        profile : identifier value
-        """
-        index=0
-        for i in self.profiles:
-            if i.number==profilenumber:
-                return i,index
-                break
-            index+=1
-
-    def index_beam(self,beamnumber: int):
-        """return the profile based on identifier value
-        
-        profile : identifier value
-        """
-        index=0
-        for i in self.beams:
-            if i.number==beamnumber:
-                return i, index
-                break
-            index+=1
-    
     def Search_max_number(self,Tarray):
         index=1
         for i in Tarray:
@@ -496,19 +479,38 @@ class elements(object):
         TypeElement=str10[0]
         number=int(str10[1])
         if TypeElement=='Profile':
-            index=self.index_profile(number)[1]
+            index=self.IndexObject(number,self.profiles)[1]
             self.profiles[index]=self.Str2profile(strdef)
 
         if TypeElement=='Y':
             self.periods[number-1]=self.Str2Y(strdef)       
 
         if TypeElement=='N':        
-            index=self.IndexNode(number)[1]
+            index=self.IndexObject(number,self.nodes)[1]
             self.nodes[index]=self.Str2N(strdef)
 
         if TypeElement=='beam':  
-            index=self.index_beam(number)[1]
-            self.beams[index]=self.Str2beam(strdef,self)      
+            index=self.IndexObject(number,self.beams)[1]
+            self.beams[index]=self.Str2beam(strdef)      
+
+        if TypeElement=='ETarget':  
+            index=self.IndexObject(number,self.ETargets)[1]
+            self.ETargets[index]=self.Str2ETarget(strdef)     
+
+    def Str2ETarget(self,str0: str):
+        str1=str0.split(':')
+        str10=str1[0].split('.')
+        str11=str1[1].split(',')
+        #
+        number=int(str10[1])
+        Ex=float(str11[0])
+        nuyx=float(str11[1])
+        Ey=float(str11[2])
+        Gxy=float(str11[3])
+        etaxxy=float(str11[4])
+        etayxy=float(str11[5])
+        #
+        return ETarget(number,Ex,nuyx,Ey,Gxy,etaxxy,etayxy)
 
     def Str2profile(self,str0: str):
         str1=str0.split(':')
@@ -546,7 +548,7 @@ class elements(object):
         #
         return node(x,y,5,int(str10[1]))
 
-    def Str2beam(self,str0: str,EL):
+    def Str2beam(self,str0: str):
         str1=str0.split(':')
         str10=str1[0].split('.')
         str11=str1[1].split(',')
@@ -558,7 +560,19 @@ class elements(object):
         profile_=int(str11[4])
         number=int(str10[1])
         beam_=beam(node_1,node_2,delta_1,delta_2,profile_,0,0,0,0,0,number)
-        beam_.evaluate_k(EL)
+        beam_.evaluate_k(self)
         #
         return beam_
+
+    def AddETarget(self):
+        index_ETarget=self.Search_first_free(self.ETargets)
+        ETarget1=ETarget(number=index_ETarget)
+        self.ETargets.append(ETarget1)
+        return ETarget1
+    
+    def AddProfile(self):
+        index_profile=self.Search_first_free(self.profiles)
+        profile1=profile(number=index_profile)
+        self.profiles.append(profile1)
+        return profile1
 
