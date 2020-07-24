@@ -6,6 +6,7 @@ import wx
 import numpy as np
 from math_ext import *
 from  Files_operations import *
+from Tree_Grid import *
 
 #"Profiles:"
 #" Profile.1:210,0.3,rect,0.1"
@@ -63,11 +64,11 @@ class periodicity(object):
 
         Pos_text_1=(P0+P1)/2
 
-        s=str(self.number)
+        # s=str(self.number)
 
-        bitmap=view.mathtext_to_wxbitmap("$\overrightarrow {{Y_"+s+"}} $")
+        # bitmap=view.mathtext_to_wxbitmap("$\overrightarrow {{Y_"+s+"}} $")
 
-        dc.DrawBitmap(bitmap,Pos_text_1[0]-bitmap.Width-2,Pos_text_1[1]+2,True)
+        # dc.DrawBitmap(bitmap,Pos_text_1[0]-bitmap.Width-2,Pos_text_1[1]+2,True)
 
 #"Nodes:"
 #" N.1:0,0"
@@ -139,10 +140,10 @@ class node(object):
             pos1_S=view.world_to_screen(pos1[0],pos1[1])+trans
             dc.DrawCircle(pos1_S[0], pos1_S[1], self.radius*1.5) 
 
-        s=str(self.number)
-        bitmap=view.mathtext_to_wxbitmap("$n_{"+s+"} $")
+        # s=str(self.number)
+        # bitmap=view.mathtext_to_wxbitmap("$n_{"+s+"} $")
 
-        dc.DrawBitmap(bitmap,pos_S[0]-bitmap.Width,pos_S[1]+self.radius+2,True)
+        # dc.DrawBitmap(bitmap,pos_S[0]-bitmap.Width,pos_S[1]+self.radius+2,True)
 
 # tree_Ctrl :
 #"Beams:"
@@ -168,8 +169,8 @@ class beam(object):
     evaluate_k(parent): evaluate length, director, stiffnesses ka and kb
     draw(parent, dc, view): draw the beam and periodic beams associated
     """
-    def __init__(self,node_1,node_2,delta_1,delta_2,profile,length,
-                 e_x,e_y,ka,kb,number):
+    def __init__(self,node_1=0,node_2=0,delta_1=0,delta_2=0,profile=0,length=0.5,
+                 e_x=0,e_y=0,ka=0,kb=0,number=1):
         self.node_1=node_1
         self.node_2=node_2
         self.length=length
@@ -180,6 +181,7 @@ class beam(object):
         self.number=number
         self.profile=profile
         self.focused=False
+        self.mu=1
     
     def evaluate_k(self,parent):
         """evaluate length, director, stiffnesses ka and kb
@@ -187,9 +189,9 @@ class beam(object):
         parent: class element (parent)
         """
         
-        N1=parent.IndexNode(self.node_1)[0]
-        N2=parent.IndexNode(self.node_2)[0]
-        prof=parent.index_profile(self.profile)[0]
+        N1=parent.IndexObject(self.node_1,parent.nodes)[0]
+        N2=parent.IndexObject(self.node_2,parent.nodes)[0]
+        prof=parent.IndexObject(self.profile,parent.profiles)[0]
 
         material_E=prof.E
         width=prof.width
@@ -202,15 +204,19 @@ class beam(object):
         N1_coord=np.array([N1.x,N1.y])
         N2_coord=np.array([N2.x+self.delta_1*Y1W[0]+self.delta_2*Y2W[0],
                            N2.y+self.delta_1*Y1W[1]+self.delta_2*Y2W[1]])
+        if np.absolute(N1.x)<1e-8:
+            self.mu+=0.5
+        if np.absolute(N1.y)<1e-8:
+            self.mu+=0.5   
+        if np.absolute(N2.x)<1e-8:
+            self.mu+=0.5
+        if np.absolute(N2.y)<1e-8:
+            self.mu+=0.5          
         E=N2_coord-N1_coord
         self.length=np.linalg.norm(E)
         E_n=E/self.length
         self.e_x=E_n[0]
         self.e_y=E_n[1]
-        
-        self.ka=material_E*width/self.length
-        self.kb=material_E*(width/self.length)**3
-        self.volume=self.length*width
 
     def draw(self, parent, dc, view):
         """draw the beam and periodic beams associated
@@ -219,11 +225,11 @@ class beam(object):
         dc: drawing functions
         view: graphic window
         """
-        prof=parent.index_profile(self.profile)[0]
+        prof=parent.IndexObject(self.profile,parent.profiles)[0]
         width=view.zoom*prof.width
 
-        N1=parent.IndexNode(self.node_1)[0]
-        N2=parent.IndexNode(self.node_2)[0]
+        N1=parent.IndexObject(self.node_1,parent.nodes)[0]
+        N2=parent.IndexObject(self.node_2,parent.nodes)[0]
         Y1W=np.array([parent.periods[0].x,parent.periods[0].y])*parent.periods[0].length
         Y2W=np.array([parent.periods[1].x,parent.periods[1].y])*parent.periods[1].length
 
@@ -261,11 +267,11 @@ class beam(object):
             dc.SetPen(wx.Pen("BLUE", width))
             dc.DrawLine(N1_S[0],N1_S[1],N2_S[0],N2_S[1])   
 
-        s=str(self.number)
-        bitmap=view.mathtext_to_wxbitmap("$b_{"+s+"} $")
+        # s=str(self.number)
+        # bitmap=view.mathtext_to_wxbitmap("$b_{"+s+"} $")
 
-        dc.DrawBitmap(bitmap,(N1_S[0]+N2_S[0])/2+width/2+2,
-                      (N1_S[1]+N2_S[1])/2+width/2+2,True)
+        # dc.DrawBitmap(bitmap,(N1_S[0]+N2_S[0])/2+width/2+2,
+        #               (N1_S[1]+N2_S[1])/2+width/2+2,True)
 
 class ETarget(object):
     def __init__(self,number=1,Ex=21000,nuyx=0.3,Ey=21000,Gxy=7000,etaxxy=0,etayxy=0):
@@ -276,7 +282,36 @@ class ETarget(object):
         self.Gxy=Gxy
         self.etaxxy=etaxxy
         self.etayxy=etayxy
+        self.tensor_stiffness=np.zeros((3,3),dtype=float)
+        self.tensor_compliance=np.zeros((3,3),dtype=float)
+        self.tensor_target=np.zeros(6,dtype=float)
     
+    def GenerateTensors(self):
+        try:
+            self.tensor_compliance[0,0]=1/self.Ex
+            self.tensor_compliance[0,1]=-self.nuyx/self.Ey
+            self.tensor_compliance[0,2]=self.etaxxy/(2*self.Gxy)
+            self.tensor_compliance[1,1]=1/self.Ey
+            self.tensor_compliance[1,2]=self.etayxy/(2*self.Gxy)
+            self.tensor_compliance[2,2]=1/(2*self.Gxy)
+            self.tensor_compliance[1,0]=self.tensor_compliance[0,1]
+            self.tensor_compliance[2,0]=self.tensor_compliance[0,2]
+            self.tensor_compliance[2,1]=self.tensor_compliance[1,2]
+            self.tensor_stiffness=np.linalg.inv(self.tensor_compliance)
+            # order : [11,22,33,12,13,23]
+            self.tensor_target[0]=self.tensor_stiffness[0,0]
+            self.tensor_target[1]=self.tensor_stiffness[1,1]
+            self.tensor_target[2]=self.tensor_stiffness[2,2]
+            self.tensor_target[3]=self.tensor_stiffness[0,1]
+            self.tensor_target[4]=self.tensor_stiffness[0,2]
+            self.tensor_target[5]=self.tensor_stiffness[1,2]
+            print("tensor target:")
+            print(self.tensor_target)
+
+        except:
+            print("Error in tensor generation from E target")
+            return -1
+
 class elements(object):
     """"Arrays of basic elements of lattice 
     
@@ -481,9 +516,11 @@ class elements(object):
         if TypeElement=='Profile':
             index=self.IndexObject(number,self.profiles)[1]
             self.profiles[index]=self.Str2profile(strdef)
+            self.RecalculeBeamk()
 
         if TypeElement=='Y':
-            self.periods[number-1]=self.Str2Y(strdef)       
+            self.periods[number-1]=self.Str2Y(strdef) 
+            self.RecalculeBeamk()      
 
         if TypeElement=='N':        
             index=self.IndexObject(number,self.nodes)[1]
@@ -496,6 +533,10 @@ class elements(object):
         if TypeElement=='ETarget':  
             index=self.IndexObject(number,self.ETargets)[1]
             self.ETargets[index]=self.Str2ETarget(strdef)     
+    
+    def RecalculeBeamk(self):
+        for i in self.beams:
+            i.evaluate_k(self)
 
     def Str2ETarget(self,str0: str):
         str1=str0.split(':')
@@ -576,3 +617,65 @@ class elements(object):
         self.profiles.append(profile1)
         return profile1
 
+    def EraseForMeshing(self,t_approx):
+        self.nodes=[]
+        self.beams=[]
+        self.profiles=[]
+        self.Mode="ADD_POINT"
+        self.P1_acquired=node(0,0,5,0)
+        self.P1_acquired_bool=False
+        self.P1_acquired.focused=False
+        self.active_profile=1
+        self.profiles.append(profile(1,210000,0.3,"rect",t_approx))
+
+    def CreateMesh(self,seed,tg : TreeGridOperations):
+        la=self.periods[0].length
+        ha=self.periods[1].length
+        L_moy=max(la,ha)/2
+        nla=int(la/seed)
+        nha=int(ha/seed)
+        seed_la=float(la/nla)
+        seed_ha=float(ha/nha)
+        nnodes=nla*nha
+        nbeams_approximate=nnodes*4+(nnodes-1)*nnodes/2*9
+        t_approximate=la*ha/(nbeams_approximate*L_moy)
+        self.EraseForMeshing(t_approximate)
+        tg.TreeCtrlInit2Mesh()
+        tg.Add_tree_basis(self.periods[0])
+        tg.Add_tree_basis(self.periods[1])
+        for i in self.ETargets:
+            tg.Add_tree_ETarget(i)
+        tg.Add_tree_profile(self.profiles[0])
+
+        index_node=1
+        for x in range(nla):
+            for y in range(nha):
+                self.nodes.append(node(x*seed_la,y*seed_ha,5,index_node))
+                tg.Add_tree_node(self.nodes[index_node-1])
+                index_node+=1
+        index_beam=1
+        for i in self.nodes:
+            self.beams.append(beam(i.number,i.number,1,0,profile=1,number=index_beam))
+            self.beams.append(beam(i.number,i.number,0,1,profile=1,number=index_beam+1))
+            self.beams.append(beam(i.number,i.number,1,1,profile=1,number=index_beam+2))
+            self.beams.append(beam(i.number,i.number,-1,1,profile=1,number=index_beam+3))
+            tg.Add_tree_beam(self.beams[index_beam-1])
+            tg.Add_tree_beam(self.beams[index_beam])
+            tg.Add_tree_beam(self.beams[index_beam+1])
+            tg.Add_tree_beam(self.beams[index_beam+2])
+            index_beam+=4
+            for j in range(1,i.number):
+                self.beams.append(beam(j,i.number,0,0,profile=1,number=index_beam))
+                self.beams.append(beam(j,i.number,1,0,profile=1,number=index_beam+8))
+                self.beams.append(beam(j,i.number,0,1,profile=1,number=index_beam+1))
+                self.beams.append(beam(j,i.number,1,1,profile=1,number=index_beam+2))
+                self.beams.append(beam(j,i.number,-1,1,profile=1,number=index_beam+3))
+                self.beams.append(beam(j,i.number,-1,0,profile=1,number=index_beam+4))
+                self.beams.append(beam(j,i.number,-1,-1,profile=1,number=index_beam+5))
+                self.beams.append(beam(j,i.number,0,-1,profile=1,number=index_beam+6))
+                self.beams.append(beam(j,i.number,1,-1,profile=1,number=index_beam+7))
+                for k in range(9):
+                    tg.Add_tree_beam(self.beams[index_beam+k-1])
+                index_beam+=9
+
+        tg.tree.ExpandAll()

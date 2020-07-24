@@ -11,8 +11,8 @@ def MatMulVect(x,y,r):
         r[i,:]=x[i,:]*y
     return r
 
-data1=np.array([i for i in range(16) ],dtype=np.float64)
-data3=np.array([i for i in range(4)],dtype=np.float64)
+data1=np.array([i for i in range(16) ],dtype=float)
+data3=np.array([i for i in range(4)],dtype=float)
 
 data1=np.reshape(data1,[4,4])
 t=np.copy(data1)

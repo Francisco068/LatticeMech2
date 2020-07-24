@@ -76,6 +76,10 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_menuItem15 = new wxMenuItem( m_menu6, wxID_ANY, wxString( wxT("Add Profile") ) , wxEmptyString, wxITEM_NORMAL );
 	m_menu6->Append( m_menuItem15 );
 
+	wxMenuItem* MeshGeneratorItem;
+	MeshGeneratorItem = new wxMenuItem( m_menu6, wxID_ANY, wxString( wxT("Mesh generation") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu6->Append( MeshGeneratorItem );
+
 	m_menubar1->Append( m_menu6, wxT("Tools") );
 
 	m_menu61 = new wxMenu();
@@ -233,5 +237,48 @@ target_dialog::target_dialog( wxWindow* parent, wxWindowID id, const wxString& t
 }
 
 target_dialog::~target_dialog()
+{
+}
+
+MeshGeneratorDialog::MeshGeneratorDialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	wxBoxSizer* bSizer6;
+	bSizer6 = new wxBoxSizer( wxVERTICAL );
+
+	m_staticText2 = new wxStaticText( this, wxID_ANY, wxT("Enter seed dimension"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText2->Wrap( -1 );
+	bSizer6->Add( m_staticText2, 0, wxALL, 5 );
+
+	m_textCtrl3 = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer6->Add( m_textCtrl3, 0, wxALL, 5 );
+
+
+	bSizer6->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer7;
+	bSizer7 = new wxBoxSizer( wxHORIZONTAL );
+
+
+	bSizer7->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	OkButtonMesh = new wxButton( this, wxID_ANY, wxT("Ok"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer7->Add( OkButtonMesh, 0, wxALL, 5 );
+
+	CancelButtonMesh = new wxButton( this, wxID_ANY, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer7->Add( CancelButtonMesh, 0, wxALL, 5 );
+
+
+	bSizer6->Add( bSizer7, 1, wxEXPAND, 5 );
+
+
+	this->SetSizer( bSizer6 );
+	this->Layout();
+
+	this->Centre( wxBOTH );
+}
+
+MeshGeneratorDialog::~MeshGeneratorDialog()
 {
 }

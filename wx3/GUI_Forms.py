@@ -18,7 +18,7 @@ import wx.grid
 class MyFrame1 ( wx.Frame ):
 
 	def __init__( self, parent ):
-		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 1275,776 ), style = wx.DEFAULT_FRAME_STYLE|wx.BORDER_SIMPLE|wx.TAB_TRAVERSAL )
+		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"LATTICEMECH2", pos = wx.DefaultPosition, size = wx.Size( 1275,776 ), style = wx.DEFAULT_FRAME_STYLE|wx.BORDER_SIMPLE|wx.TAB_TRAVERSAL )
 
 		self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
 
@@ -71,6 +71,9 @@ class MyFrame1 ( wx.Frame ):
 
 		self.m_menuItem15 = wx.MenuItem( self.m_menu6, wx.ID_ANY, u"Add Profile", wx.EmptyString, wx.ITEM_NORMAL )
 		self.m_menu6.Append( self.m_menuItem15 )
+
+		self.MeshGeneratorItem = wx.MenuItem( self.m_menu6, wx.ID_ANY, u"Mesh generation", wx.EmptyString, wx.ITEM_NORMAL )
+		self.m_menu6.Append( self.MeshGeneratorItem )
 
 		self.m_menubar1.Append( self.m_menu6, u"Tools" )
 
@@ -199,7 +202,7 @@ class MyFrame1 ( wx.Frame ):
 class target_dialog ( wx.Dialog ):
 
 	def __init__( self, parent ):
-		wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 241,123 ), style = wx.DEFAULT_DIALOG_STYLE )
+		wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"E Target Dialog", pos = wx.DefaultPosition, size = wx.Size( 241,123 ), style = wx.DEFAULT_DIALOG_STYLE )
 
 		self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
 
@@ -229,6 +232,54 @@ class target_dialog ( wx.Dialog ):
 
 
 		self.SetSizer( bSizer7 )
+		self.Layout()
+
+		self.Centre( wx.BOTH )
+
+	def __del__( self ):
+		pass
+
+
+###########################################################################
+## Class MeshGeneratorDialog
+###########################################################################
+
+class MeshGeneratorDialog ( wx.Dialog ):
+
+	def __init__( self, parent ):
+		wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"Mesh generator dialog", pos = wx.DefaultPosition, size = wx.Size( 219,145 ), style = wx.DEFAULT_DIALOG_STYLE )
+
+		self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
+
+		bSizer6 = wx.BoxSizer( wx.VERTICAL )
+
+		self.m_staticText2 = wx.StaticText( self, wx.ID_ANY, u"Enter seed dimension", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText2.Wrap( -1 )
+
+		bSizer6.Add( self.m_staticText2, 0, wx.ALL, 5 )
+
+		self.m_textCtrl3 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		bSizer6.Add( self.m_textCtrl3, 0, wx.ALL, 5 )
+
+
+		bSizer6.Add( ( 0, 0), 1, wx.EXPAND, 5 )
+
+		bSizer7 = wx.BoxSizer( wx.HORIZONTAL )
+
+
+		bSizer7.Add( ( 0, 0), 1, wx.EXPAND, 5 )
+
+		self.OkButtonMesh = wx.Button( self, wx.ID_ANY, u"Ok", wx.DefaultPosition, wx.DefaultSize, 0 )
+		bSizer7.Add( self.OkButtonMesh, 0, wx.ALL, 5 )
+
+		self.CancelButtonMesh = wx.Button( self, wx.ID_ANY, u"Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
+		bSizer7.Add( self.CancelButtonMesh, 0, wx.ALL, 5 )
+
+
+		bSizer6.Add( bSizer7, 1, wx.EXPAND, 5 )
+
+
+		self.SetSizer( bSizer6 )
 		self.Layout()
 
 		self.Centre( wx.BOTH )

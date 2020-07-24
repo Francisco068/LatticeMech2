@@ -34,8 +34,11 @@ class Files_system():
                     EL.nodes.append(EL.Str2N(str0))
 
                 if str10[0]=="beam":
-                    EL.beams.append(EL.Str2beam(str0,EL))
+                    EL.beams.append(EL.Str2beam(str0))
 
+                if str10[0]=="ETarget":
+                    EL.ETargets.append(EL.Str2ETarget(str0))
+        
         treeCtrl.ExpandAll()
 
     def Save_xml(self,tree,file):
@@ -119,17 +122,6 @@ class Files_system():
         myfile.write(str_Eb)
         myfile.write(str_Delta1)
         myfile.write(str_Delta2)
-        # Write list of element axial and bending stiffness
-        myfile.write("\"commentt6\": \"List of element axial and bending stiffness\",\n")
-        str_Ka="\"Ka\": ["
-        str_Kb="\"Kb\": ["
-        for i in parent.EL.beams:
-            str_Ka=str_Ka+str(i.ka)+','
-            str_Kb=str_Kb+str(i.kb)+','
-        str_Ka=str_Ka[0:len(str_Ka)-1]+"],\n"
-        str_Kb=str_Kb[0:len(str_Kb)-1]+"],\n"
-        myfile.write(str_Ka)
-        myfile.write(str_Kb)
         # Write list of element lengths and volumes
         myfile.write("\"comment7\": \"List of element lengths and volumes\",\n")
         str_Lb="\"Lb\": ["
@@ -169,7 +161,7 @@ class Files_system():
         # Write the direction vectors of each element
         myfile.write("# Define the direction vectors of each element\n")
         for i in parent.EL.beams:
-            myfile.write("e[%i]:=[%10e,%10e];\n" % (i.number,i.e_x,i.e_y))
+            myfile.write("e[%i]:=<%10e,%10e>;\n" % (i.number,i.e_x,i.e_y))
 
         # Write basis periodicity vectors
         myfile.write("# define the global periodicity vectors\n")
@@ -205,33 +197,24 @@ class Files_system():
         myfile.write(str_Eb)
         myfile.write(str_Delta1)
         myfile.write(str_Delta2)
-        # Write list of element axial and bending stiffness
-        myfile.write("# List of element axial and bending stiffness\n")
-        str_Ka="Kb:=["
-        str_Kb="Kc:=["
-        for i in parent.EL.beams:
-            str_Ka=str_Ka+"%10e" % i.ka +','
-            str_Kb=str_Kb+"%10e" % i.kb+','
-        str_Ka=str_Ka[0:len(str_Ka)-1]+"];\n"
-        str_Kb=str_Kb[0:len(str_Kb)-1]+"];\n"
-        myfile.write(str_Ka)
-        myfile.write(str_Kb)
+
         # Write list of element lengths and volumes
         myfile.write("# List of element lengths and volumes\n")
         str_Lb="Lb:=["
-        str_tb="Tb:=["
-        str_Vb="Vb:=["
+        str_tb="tb:=["
+        str_Esb="Esb:=["
         for i in parent.EL.beams:
             str_Lb=str_Lb+"%10e" % i.length+','
             prof=parent.EL.IndexObject(i.profile,parent.EL.profiles)[0]
             str_tb=str_tb+"%10e" % prof.width+','
-            str_Vb=str_Vb+"%10e" % (i.length*prof.width)+','
+            str_Esb=str_Esb+"%10e" % prof.E+','
+
         str_Lb=str_Lb[0:len(str_Lb)-1]+"];\n"
         str_tb=str_tb[0:len(str_tb)-1]+"];\n"
-        str_Vb=str_Vb[0:len(str_Vb)-1]+"];\n"
+        str_Esb=str_Esb[0:len(str_Esb)-1]+"];\n"
         myfile.write(str_Lb)
         myfile.write(str_tb)
-        myfile.write(str_Vb)
+        myfile.write(str_Esb)
         myfile.close()
         return 0
 

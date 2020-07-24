@@ -12,15 +12,13 @@ import xml.etree.ElementTree as ET
 
 from DiscreteLatticeMech.DiscreteLatticeMechCore import Solver, Writer
 
-# todo : quand je change la longueur des vecteurs de base, il faut que je pense à recalculer les longueurs et modules de toutes les poutres !
-# todo : de même quand je change une composante du profil !
-
 class GUI3D(wx.App):
     
     def OnInit(self):
         self.GUI= MyFrame1(None)
         self.SetTopWindow(self.GUI)
         self.DIAL=target_dialog(None) 
+        self.MeshDialog=MeshGeneratorDialog(None)
         # file attributes
         self.File_saved = False
         self.Filename_defined = False
@@ -31,6 +29,8 @@ class GUI3D(wx.App):
         self.EL=elements(self)
         # dialogs variables
         self.ETarget_number=1
+        # mesh variables
+        self.seed_mesh=0.5
 
         # Bind MenuBar event
         self.Bind(wx.EVT_MENU, self.File_open, id=self.GUI.m_menuItem1.GetId())
@@ -46,6 +46,7 @@ class GUI3D(wx.App):
         self.Bind(wx.EVT_MENU, self.Add_beam, id=self.GUI.m_menuItem10.GetId())
         self.Bind(wx.EVT_MENU, self.AddETarget, id=self.GUI.m_menuItem14.GetId())
         self.Bind(wx.EVT_MENU, self.AddProfile, id=self.GUI.m_menuItem15.GetId())
+        self.Bind(wx.EVT_MENU, self.MeshGeneration,id=self.GUI.MeshGeneratorItem.GetId())
 
         self.Bind(wx.EVT_MENU, self.Help, id=self.GUI.m_menuItem11.GetId())
         self.Bind(wx.EVT_MENU, self.Calculations_go, id=self.GUI.m_menuItem12.GetId())
@@ -66,6 +67,9 @@ class GUI3D(wx.App):
         # Bind dialog event
         self.Bind(wx.EVT_BUTTON,self.DIALOK,self.DIAL.OkButton)
         self.Bind(wx.EVT_BUTTON,self.DIALCANCEL,self.DIAL.CancelButton)
+        # Bind mesh event 
+        self.Bind(wx.EVT_BUTTON,self.MeshOK,self.MeshDialog.OkButtonMesh)
+        self.Bind(wx.EVT_BUTTON,self.MeshCancel,self.MeshDialog.CancelButtonMesh)        
         # initialise Choice 2D / 3D
         self.GUI.m_choice1.Select(2)
         # initialise graphic canvas
@@ -87,6 +91,20 @@ class GUI3D(wx.App):
         self.Canvas2D.Refresh()
         return True
 
+    def MeshGeneration(self,event):
+        self.MeshDialog.Show(True)
+        event.Skip()
+
+    def MeshOK(self,event):
+        self.seed_mesh=float(self.MeshDialog.m_textCtrl3.Value)
+        self.MeshDialog.Show(False)
+        self.EL.CreateMesh(self.seed_mesh,self.Tg)
+        event.Skip()
+
+    def MeshCancel(self,event):
+        self.MeshDialog.Show(False)
+        event.Skip()
+
     def InverseHomogenization(self,event):
         self.DIAL.Show(True)
         event.Skip()
@@ -95,6 +113,21 @@ class GUI3D(wx.App):
         self.ETarget_number=int(self.DIAL.m_textCtrl2.Value)
         print("E Target number : {}".format(self.ETarget_number))
         self.DIAL.Show(False)
+
+        for i in self.EL.beams:
+            i.evaluate_k(self.EL)
+
+        # Profiling time code
+        start_time = time.time()
+
+        sol=solverFDR(self.EL) # first homogenization and initialisation for Inverse Homogenization
+        sol.InverseHomogenization(self.EL,self.ETarget_number)
+        # Time taken in seconds
+        end_time = time.time()
+
+        time_taken = end_time - start_time
+        self.GUI.m_textCtrl2.AppendText("Exec time={}\n".format(time_taken))
+
         event.Skip()
 
     def DIALCANCEL(self, event):
@@ -137,23 +170,6 @@ class GUI3D(wx.App):
         self.GUI.m_panel3.Refresh()
         event.Skip()   
     
-    # def Calculations(self,writer):
-    #     """Call calculations modules"""
-    #     solver = Solver()
-    #     try:
-    #         with open("input_data.json", 'r') as f:
-    #             data = json.load(f)
-    #     except IOError as error:
-    #         self.Message_dialog("could not open input file input_data.json",wx.ICON_ERROR)
-
-    #     solver.solve(data)
-
-    #     # Write to file
-        
-    #     writer.WriteTensorsToFile(solver.InputData, solver.CMatTensor, solver.FlexMatTensor)
-    #     writer.WriteEffectivePropertiesToFile(solver.Bulk, solver.Ex, solver.Ey, solver.Poissonyx, solver.Poissonxy, solver.G,solver.rho)
-    #     writer.PlotEffectiveProperties(solver.Bulk, solver.Ex, solver.Ey, solver.Poissonyx, solver.Poissonxy, solver.G)
-    
     def Message_results(self,path):
         try:
             panel=self.GUI.m_textCtrl2
@@ -174,14 +190,12 @@ class GUI3D(wx.App):
             panel.write("Something wrong in data results !\n")  
         pass
 
-
     def Calculations_go(self, event): #from menu
         """menu Calculations Go"""  
         for i in self.EL.beams:
             i.evaluate_k(self.EL)
         if self.Filename_json=="":
             self.Filename_json="input_data.json"
-
 
         self.fs.Generate_json(self.Filename_json,self)
 
@@ -192,27 +206,14 @@ class GUI3D(wx.App):
             self.Message("could not open input file {}".format(self.Filenam_json))
             return
 
-#        self.Message(json.dumps(data, indent=4, sort_keys=False))
-        
         # Profiling time code
         start_time = time.time()
 
         sol=solverFDR(self.EL)
-        # solver = Solver()
-        # solver.solve(data)
-        # The code to be evaluated
         end_time = time.time()
         # Time taken in seconds
         time_taken = end_time - start_time
         self.GUI.m_textCtrl2.AppendText("Exec time={}\n".format(time_taken))
-
-        # writer = Writer()
-        # writer.WriteTensorsToFile(solver.CMatTensor, solver.FlexMatTensor)
-        # writer.WriteEffectivePropertiesToFile(solver.Bulk, solver.Ex, solver.Ey, solver.Poissonyx, solver.Poissonxy, solver.G, solver.rho)
-        # writer.PlotEffectiveProperties(solver.Bulk, solver.Ex, solver.Ey, solver.Poissonyx, solver.Poissonxy, solver.G)
-
-        # self.Message_results(writer.folder)
- 
         event.Skip()
 
     def Help(self, event): #from menu

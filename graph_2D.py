@@ -200,8 +200,6 @@ class Graph_window(wx.Window):
         str2="Mode :"+ self.EL.Mode+ " Zoom : %4.2f "+str1
         dc.DrawText(str2 % self.view_1.zoom,10,10) 
 
-
-
     def on_paint(self, event):
         """Redraw all graphic components on event PAINT"""
         self.Repaint()
@@ -234,9 +232,9 @@ class Graph_window(wx.Window):
                 else:
                     i.focused=False
             for i in self.EL.beams:
-                N1=self.EL.IndexNode(i.node_1)[0]
-                N2=self.EL.IndexNode(i.node_2)[0]
-                prof=self.EL.index_profile(i.profile)[0]
+                N1=self.EL.IndexObject(i.node_1,self.EL.nodes)[0]
+                N2=self.EL.IndexObject(i.node_2,self.EL.nodes)[0]
+                prof=self.EL.IndexObject(i.profile,self.EL.profiles)[0]
                 Y1=self.EL.periods[0]
                 Y2=self.EL.periods[1]
                 Y1W=np.array([Y1.x,Y1.y])*Y1.length

@@ -164,6 +164,16 @@ class TreeGridOperations():
             ,ETarget.nuyx,ETarget.Ey,ETarget.Gxy, ETarget.etaxxy,\
             ETarget.etayxy)
         self.tree.AppendItem(resultat[1],str_tree)
+
+    def Add_tree_basis(self,basis):
+        resultat=self.Search_branch_tree_ctrl_perso("Basis")
+        if (resultat[0]==-1):
+            self.Message("Error: No branch of Basis inputs\n")
+            return
+            
+        str_tree="Y.%i:%g,%g" % (basis.number,basis.x*basis.length\
+            ,basis.y*basis.length)
+        self.tree.AppendItem(resultat[1],str_tree)
     
     def Remove_tree_node(self,numero: int):
         Item1=self.Search_item_tree_ctrl_perso("Nodes",numero)
@@ -255,4 +265,15 @@ class TreeGridOperations():
         self.tree.AppendItem(NodesId, "N.1:0,0")
         self.tree.AppendItem(ProfilId, "Profile.1:210000,0.3,rect,0.3")
         self.tree.AppendItem(ETargetId,"ETarget.1:21000,0.3,21000,7000,0,0")
+        self.tree.ExpandAll()
+
+    def TreeCtrlInit2Mesh(self):
+        """Initialise Tree Ctrl"""
+        self.tree.DeleteAllItems()
+        tree_Lattice_Id=self.tree.AddRoot("Lattice")
+        ProfilId=self.tree.AppendItem(tree_Lattice_Id,"Profiles:")
+        BasisId=self.tree.AppendItem(tree_Lattice_Id, "Basis:")
+        NodesId=self.tree.AppendItem(tree_Lattice_Id, "Nodes:")
+        BeamsId=self.tree.AppendItem(tree_Lattice_Id, "Beams:")
+        ETargetId=self.tree.AppendItem(tree_Lattice_Id,"E_Targets:")
         self.tree.ExpandAll()

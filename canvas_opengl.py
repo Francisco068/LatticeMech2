@@ -55,7 +55,7 @@ class OpenGLCanvas(glcanvas.GLCanvas):
         ## Vertex Buffer Object
         vbo = glGenBuffers(1) # Generate 1 buffer
 
-        vertices = np.array([0.0,  0.5, 0.5, -0.5, -0.5, -0.5], dtype=np.float32)
+        vertices = np.array([0.0,  0.5, 0.5, -0.5, -0.5, -0.5], dtype=float)
 
         ## Upload data to GPU
         glBindBuffer(GL_ARRAY_BUFFER, vbo)

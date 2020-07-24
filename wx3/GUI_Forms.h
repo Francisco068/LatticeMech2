@@ -68,7 +68,7 @@ class MyFrame1 : public wxFrame
 
 	public:
 
-		MyFrame1( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1275,776 ), long style = wxDEFAULT_FRAME_STYLE|wxBORDER_SIMPLE|wxTAB_TRAVERSAL );
+		MyFrame1( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("LATTICEMECH2"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1275,776 ), long style = wxDEFAULT_FRAME_STYLE|wxBORDER_SIMPLE|wxTAB_TRAVERSAL );
 
 		~MyFrame1();
 
@@ -101,8 +101,28 @@ class target_dialog : public wxDialog
 
 	public:
 
-		target_dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 241,123 ), long style = wxDEFAULT_DIALOG_STYLE );
+		target_dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("E Target Dialog"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 241,123 ), long style = wxDEFAULT_DIALOG_STYLE );
 		~target_dialog();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class MeshGeneratorDialog
+///////////////////////////////////////////////////////////////////////////////
+class MeshGeneratorDialog : public wxDialog
+{
+	private:
+
+	protected:
+		wxStaticText* m_staticText2;
+		wxTextCtrl* m_textCtrl3;
+		wxButton* OkButtonMesh;
+		wxButton* CancelButtonMesh;
+
+	public:
+
+		MeshGeneratorDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Mesh generator dialog"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 219,145 ), long style = wxDEFAULT_DIALOG_STYLE );
+		~MeshGeneratorDialog();
 
 };
 
